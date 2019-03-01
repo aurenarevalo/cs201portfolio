@@ -17,13 +17,25 @@ void initialize_ncurses();
 short WINCOL;
 
 int main(int argc, char**args){
-	adjList *al=init_adjList(1);
-	new_node(&al,2);
-	new_node(&al,3);
-	new_node(&al,5);
+	Graph* gr = init_Graph(5);
+	new_edge(&gr,1,2);
+	new_edge(&gr,1,3);
+	int **m = construct_adj_matrix(gr);
+	// int **m = calloc(4,sizeof(int*));
+	// for(int i=0;i<4;i++)
+	// 	m[i] = malloc(sizeof(int));
 
-
-
+	for(int r=0; r<4;r++)
+	{
+		for(int c=0; c<4; c++)
+			m[r][c] = 3*c;
+	}
+	for(int r=0; r<4;r++)
+	{
+		for(int c=0; c<4; c++)
+			printf("%d | ",m[r][c]);
+		printf("\n");
+	}
 }
 
 
