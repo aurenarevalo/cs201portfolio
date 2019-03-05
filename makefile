@@ -2,7 +2,7 @@
 CC = gcc
 CFLAGS = -Wall
 LDFLAGS= -std=c11 -lmenu -lncurses -lpanel
-OBJFILES = main.o menumanager.o winman.o struct.o
+OBJFILES = main.o menumanager.o winman.o struct.o utility.o
 TARGET = main
 
 all: $(TARGET) clean
