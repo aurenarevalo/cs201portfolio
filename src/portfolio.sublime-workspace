@@ -1,0 +1,494 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"set_menu_",
+				"set_menu_win"
+			],
+			[
+				"check_size",
+				"check_size_menuList"
+			],
+			[
+				"print",
+				"print_matrix"
+			],
+			[
+				"curr",
+				"curr_indx"
+			],
+			[
+				"tmp",
+				"tmp_list"
+			],
+			[
+				"ver",
+				"vertices"
+			],
+			[
+				"v",
+				"vertices"
+			],
+			[
+				"mov",
+				"move_panel"
+			],
+			[
+				"panel",
+				"panel_array"
+			],
+			[
+				"COL",
+				"COLOR_WHITE"
+			],
+			[
+				"new",
+				"newwinOffset"
+			],
+			[
+				"resi",
+				"resizeHandler"
+			],
+			[
+				"initialize",
+				"initialize_ncurses"
+			],
+			[
+				"cha",
+				"choiceArray"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "main.c",
+			"settings":
+			{
+				"buffer_size": 2474,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "scene.h",
+			"settings":
+			{
+				"buffer_size": 2327,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "scene.c",
+			"settings":
+			{
+				"buffer_size": 12627,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "makefile",
+			"settings":
+			{
+				"buffer_size": 500,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "winman.h",
+			"settings":
+			{
+				"buffer_size": 1235,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/auren/projects/cs201portfolio",
+		"/home/auren/projects/cs201portfolio/src"
+	],
+	"file_history":
+	[
+		"/home/auren/projects/cs201portfolio/src/scene.c",
+		"/home/auren/projects/cs201portfolio/src/infection_ds.h",
+		"/home/auren/projects/cs201portfolio/src/infection_ds.c",
+		"/home/auren/projects/cs201portfolio/src/splash.txt",
+		"/home/auren/projects/cs201portfolio/src/portfolio.sublime-project",
+		"/home/auren/projects/cs201portfolio/src/makefile",
+		"/home/auren/projects/cs201portfolio/src/winman.h",
+		"/home/auren/projects/cs201portfolio/src/menumanager.h",
+		"/home/auren/projects/cs201portfolio/src/test.txt",
+		"/home/auren/projects/cs201portfolio/src/gamemanager.c",
+		"/home/auren/projects/cs201portfolio/src/main.c",
+		"/home/auren/projects/cs201portfolio/src/winman.c",
+		"/home/auren/projects/cs201portfolio/src/menumanager.c",
+		"/home/auren/projects/cs201portfolio/src/stdlibs.txt",
+		"/home/auren/projects/cs201portfolio/src/utility.h",
+		"/home/auren/projects/cs201portfolio/src/utility.c",
+		"/home/auren/projects/cs201portfolio/src/gamemanager.h",
+		"/home/auren/projects/cs201portfolio/main.c",
+		"/home/auren/projects/cs201portfolio/struct.c",
+		"/home/auren/projects/cs201portfolio/struct.h",
+		"/home/auren/projects/cs201portfolio/utility.c",
+		"/home/auren/projects/cs201portfolio/utility.h",
+		"/home/auren/projects/cs201portfolio/winman.c",
+		"/home/auren/projects/cs201portfolio/makefile",
+		"/home/auren/projects/portfolio/makefile",
+		"/home/auren/projects/portfolio/keycodes.h",
+		"/home/auren/projects/portfolio/menumanager.h",
+		"/home/auren/projects/portfolio/menumanager.c",
+		"/home/auren/projects/portfolio/test/en_US.dic",
+		"/home/auren/projects/portfolio/winman.h",
+		"/home/auren/projects/portfolio/winman.c",
+		"/home/auren/projects/portfolio/struct.h",
+		"/home/auren/projects/portfolio/struct.c",
+		"/home/auren/projects/portfolio/test/aspell-en-0.50-2/README",
+		"/home/auren/projects/portfolio/mainmenu.c",
+		"/home/auren/projects/portfolio/test/en_US.aff",
+		"/home/auren/projects/portfolio/mainmenu.h",
+		"/home/auren/projects/portfolio/test/test.c",
+		"/home/auren/projects/portfolio/main (copy).c",
+		"/home/auren/projects/portfolio/keycodes",
+		"/home/auren/projects/portfolio/struct_p.h"
+	],
+	"find":
+	{
+		"height": 49.0
+	},
+	"find_in_files":
+	{
+		"height": 134.0,
+		"where_history":
+		[
+			"*.txt"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"printf",
+			"372",
+			"D",
+			"}\n",
+			"\tSCENE* scene = malloc(sizeof(SCENE));\n\tscene->pl = init_panelList(panels);\n\tif(menus >0){\n\t\tscene->has_menus=true;\n\t\tscene->ml = init_menuList(menus);\n\t}\n\telse\n\t{\n\t\tscene->has_menus = false;\n\t\tscene->ml = NULL;\n\t}\n\treturn scene;",
+			",);",
+			"oh",
+			"zoo",
+			"oh",
+			"zoo",
+			".",
+			"float",
+			"free(",
+			"free()",
+			"seed",
+			"\tn->n = node;\n\tn->next = NULL;\n\ttmpnode->next = n;\n\ttmplist->head = tmp2;"
+		],
+		"highlight": false,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"8"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": false
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "main.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2474,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1253,
+								1253
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1316.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "scene.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2327,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1820,
+								1820
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2100.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "scene.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 12627,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9086,
+								9086
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 11505.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "makefile",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 500,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								141,
+								141
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Makefile/Makefile.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "winman.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1235,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								407,
+								407
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 35.0
+	},
+	"input":
+	{
+		"height": 47.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "portfolio.sublime-project",
+	"replace":
+	{
+		"height": 66.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 305.0,
+		"last_filter": "sc",
+		"selected_items":
+		[
+			[
+				"sc",
+				"SCENE"
+			],
+			[
+				"SC",
+				"SCENE"
+			],
+			[
+				"add",
+				"add_panel"
+			],
+			[
+				"add_men",
+				"add_menu"
+			],
+			[
+				"check_",
+				"check_size_menuList"
+			]
+		],
+		"width": 592.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 318.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -16,7 +16,6 @@ typedef struct alist{
 	adjNode *head;
 }adjList;
 
-
 typedef struct grph{
 	int weight;
 	int vertices;

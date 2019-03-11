@@ -12,7 +12,7 @@ MENU* mm;
 
 choiceList* init_choiceList(size_t n)
 {
-	choiceList * list = (choiceList*)NULL;
+	choiceList * list = malloc(sizeof(choiceList));
 	list->choice_array = calloc(n,sizeof(char**));
 	list->size = n;
 	list->n = 0;
@@ -64,6 +64,27 @@ MENU* create_menu(choiceList *list)
 	return menu;
 }
 
+
+MENU* _new_menu(const char *str,...)
+{
+	choiceList* list = init_choiceList(2);
+	va_list valist;
+	va_start(valist,str);
+	int i=0;
+	while(str){
+		list->n++;
+		check_size(list);
+		list->choice_array[i++] = str;
+		str = va_arg(valist,const char*);
+	}
+	va_end(valist);
+
+	MENU* menu =create_menu(list);
+	return menu;
+}
+
+
+
 void resize_handler(int sig)
 {
 	clear();
@@ -72,6 +93,24 @@ void resize_handler(int sig)
 	refresh();
 }
 
+void assign_menu(panelList* pl, int pn, MENU** menu)
+{
+	MENU* tmp_menu = *menu;
+	WINDOW* ptr = panel_window(pl->panel_array[pn]);
+	set_menu_win(tmp_menu,ptr);
+	// WINDOW* sub = derwin(panel_window())
+}
+
+void assign_menu_subwin(MENU** menu,int xpad,int ypad, int offy, int offx)
+{
+	MENU* ptr = *menu;
+	WINDOW* mainwin = menu_win(ptr);
+	int xlim,ylim;
+	getmaxyx(mainwin,ylim,xlim);
+	WINDOW* sub = derwin(mainwin,ylim-ypad,xlim-xpad,offy,offx);
+	set_menu_sub(ptr,sub);
+
+}
 /*void create_margin(WIN* win,int left, int right, int top, int bot)
 {
 

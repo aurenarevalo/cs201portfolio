@@ -184,6 +184,15 @@ char* get_identifier(panelList* pl, int panel_num)
 	return pl->id[panel_num];
 }
 
+WINDOW* panelList_window(panelList* pl, int indx)
+{
+	if(indx > pl->n)
+	{
+		printf("PANEL DOESN'T EXIST: %d\n",indx);
+		return NULL;
+	}
+	return panel_window(pl->panel_array[indx]);
+}
 /*
 * Initialize windowList struct based on size
 */
@@ -218,5 +227,7 @@ char* get_identifier(panelList* pl, int panel_num)
 	wl->y[wl->n] = y; wl->x[wl->n] = x;
 	return wl;
 }
+
+// WINDOW* get_win_windowList(windowList* wl, int indx)
 
 // int get_startx

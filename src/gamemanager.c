@@ -132,7 +132,6 @@ gameGrid* generate_gameGrid()
 	add_new_node(&gg,4,50,2,2);
 	find_distance(gg->node[0],gg->node[1]);
 
-	// for()
 
 	return gg;
 }
