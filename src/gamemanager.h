@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <panel.h>
 
 
 #include "infection_ds.h"
 #include "utility.h"
+#include "button.h"
 
 
 #define MAX_UNITS 100
@@ -43,20 +45,22 @@ typedef struct inode{
 	int control;
 	int units;
 	Point pos;
+	BUTTON* node_but;	
 	adjList al;
 }infectionNode;
 
 typedef struct ggrid{
 	int nodes;
 	intMatrix *parent;
-	infectionNode *node;
+	PANEL* game_panel;
+	infectionNode **node;
 }gameGrid;
 
-gameGrid* init_gameGrid(int r, int c, int nodes);
+gameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan);
 
 infectionNode* init_infectionNode();
 
-void place_node(gameGrid** grid,infectionNode node);
+void place_node(gameGrid** grid,infectionNode *node);
 
 void set_node_params(infectionNode* node,int contr, int units, int x, int y);
 
@@ -74,4 +78,17 @@ float find_distance(infectionNode n1, infectionNode n2);
 *	draw_connections(gameGrid*,) -- calls add_new_node
 */
 
-gameGrid* generate_gameGrid();
+
+
+gameGrid* generate_gameGrid(PANEL* game_pan);
+
+void refresh_nodes(gameGrid** gg);
+
+int is_player_node(infectionNode* node);
+
+int mk1_check(gameGrid* gg,MEVENT me);
+
+void add_units(gameGrid* gg,int node, int units);
+
+void sub_units(gameGrid* gg,int node, int units);
+

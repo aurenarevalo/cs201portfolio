@@ -11,7 +11,6 @@ typedef struct m menuList;
 typedef struct scene SCENE;
 
 
-
 /*
 * Handles errors with windows. Errnum = 1 means it breaks terminal bounds
 * also displays window number (in array) to help debug.
@@ -114,7 +113,6 @@ void check_size_windowList( windowList *list)
 ** PANEL LIST FUNCTIONS
 ****/
 
-
 /*
 * initialize  and allocate memory to a newly created panelList based on size
 */
@@ -128,9 +126,6 @@ panelList* init_panelList(size_t size)
 	tmp = (char**)calloc(size,sizeof(char*));
 	ps->panel_array = (PANEL**)calloc(size,sizeof(PANEL*));
 	ps->id = tmp;
-	/*for(int i = 0;i<(int)size;i++)
-		ps->id[i] = (char*)calloc(24,sizeof(char));
-*/
 	ps->wl_ref = init_windowList(size);
 	return ps;
 }
@@ -150,21 +145,18 @@ void add_panel(SCENE* scene,char *id,int y, int x, int starty, int startx){
  	scene->pl->n++;
 }
  
-/*panelList* add_panel_offset(panelList* pl, char*id, int offy, int offx)
+void add_panel_offset(SCENE* scene, char*id, int offy, int offx)
 {
-	panelList *ps = pl;	
-
-	check_size_panelList(ps);
+	check_size_panelList(scene->pl);
 	int idlen=0;
 	while(id[idlen] != '\0')
 		idlen++;
-	ps->id[ps->n] = (char*)calloc(idlen,sizeof(char));
-	ps->id[ps->n] = id;
- 	
-	ps->panel_array[ps->n] = new_panel(ps->wl_ref->window_array[ps->n]);
- 	ps->n++;
-	return ps;
-}*/
+ 	scene->pl->id[scene->pl->n] = (char*)calloc(idlen,sizeof(char));
+	scene->pl->id[scene->pl->n] = id;
+	scene->pl->panel_array[scene->pl->n] = new_panel(newwin_offset(offy,offx));
+ 	scene->pl->n++;
+}
+
 /*
 * move function specifically for the defined structure.
 * Makes use of the already-present move_panel function,
@@ -192,10 +184,6 @@ WINDOW* panelList_window(panelList* pl, int indx)
 	}
 	return panel_window(pl->panel_array[indx]);
 }
-
-
-
-
 
 /*
 * Initialize windowList struct based on size
@@ -231,7 +219,6 @@ WINDOW* panelList_window(panelList* pl, int indx)
 	wl->y[wl->n] = y; wl->x[wl->n] = x;
 	return wl;
 }
-
 /*
 *	Creates a new, centered window, placing it offset from parameters
 */
@@ -245,10 +232,6 @@ WINDOW* panelList_window(panelList* pl, int indx)
 	refresh();
 	return win; 
 }
-
-// WINDOW* get_win_windowList(windowList* wl, int indx)
-
-
 /***********
 ****CHOICE LIST FNS
 *********/
@@ -307,24 +290,19 @@ MENU* create_menu(choiceList *list)
 	return menu;
 }
 
-
 MENU* _new_menu(va_list args)
 {
 	choiceList* list = init_choiceList(2);
-	// va_list valist;
-	// va_start(valist,str);
 	const char *str;
 	str= va_arg(args,const char*);
 	int i=0;
 	while(str){
-		printw("%s\n",str );
+		// printw("%s\n",str );
 		list->n++;
 		check_size(list);
 		list->choice_array[i++] = str;
 		str = va_arg(args,const char*);
 	}
-	// va_end();
-
 	MENU* menu =create_menu(list);
 	return menu;
 }
@@ -333,9 +311,6 @@ menuList* init_menuList(size_t size)
 {
 	menuList* ml = malloc(sizeof(menuList));
 	ml->menu_array = (MENU**)malloc(size*sizeof(MENU*));
-	// for(int i=0;i<size; i++){
-	// 	ml->menu_array[i] = new_menu(NULL);
-	// }
 	ml->n = 0;
 	ml->size = size;
 	return ml;
@@ -343,37 +318,37 @@ menuList* init_menuList(size_t size)
 
 void add_menu(SCENE* scene,...)
 {
-	// SCENE* ptr = *scene;
-	// scene->ml = init_menuList(2);
 	scene->has_menus = true;
-	// ptr->ml->n++;
 	check_size_menuList(scene->ml);
-	// choiceList* list = init_choiceList(2);
 	va_list valist;
 	va_start(valist,scene);
-
 	MENU* menu =_new_menu(valist);
-
 	va_end(valist);
-
+	ITEM** iteml = menu_items(menu);
+	printw("%d",iteml[0]->name.length);
+	int max_len=0;
+	for(int i=0; iteml[i]!=NULL;i++)
+	{
+		if(iteml[i]->name.length >max_len) max_len=iteml[i]->name.length;
+	}
+	scene->ml->max_len = max_len;
 	scene->ml->menu_array[scene->ml->n++] = menu;
-
 }
 
 void assign_menu(PANEL* p, MENU** menu)
 {
 	MENU* tmp_menu = *menu;
-	// WINDOW* ptr = panel_window(pl->panel_array[pn]);
-	 set_menu_win(tmp_menu,panel_window(p));
+	set_menu_win(tmp_menu,panel_window(p));
 }
 
-void assign_menu_sub(MENU** menu,int xpad,int ypad, int offy, int offx)
+void assign_menu_sub(MENU** menu,int ypad,int xpad, int offy, int offx)
 {
 	MENU* ptr = *menu;
 	WINDOW* mainwin = menu_win(ptr);
 	int xlim,ylim;
 	getmaxyx(mainwin,ylim,xlim);
-	WINDOW* sub = derwin(mainwin,ylim-ypad,xlim-xpad,offy,offx);
+	// printw("%d r, %d col ", ylim-ypad,xlim-xpad);
+	WINDOW* sub = derwin(mainwin,ypad,xpad,offy,(xlim-offx)/2);
 	set_menu_sub(ptr,sub);
 }
 
@@ -385,7 +360,6 @@ void assign_menu_sub(MENU** menu,int xpad,int ypad, int offy, int offx)
 
 void set_smenu_winsub(SCENE* scene, int mn,int pn,int xpad, int ypad, int offy, int offx)
 {
-	// SCENE* ptr = *scene;
 	if(mn > scene->ml->n || pn > scene->pl->n){
 		window_error_handler(2,mn,pn,scene->ml->n,scene->pl->n);
 		return;
@@ -395,7 +369,7 @@ void set_smenu_winsub(SCENE* scene, int mn,int pn,int xpad, int ypad, int offy, 
 		return;
 	}
 	assign_menu(scene->pl->panel_array[pn],&scene->ml->menu_array[mn]);
-	assign_menu_sub(&scene->ml->menu_array[mn],xpad,ypad,offy,offx);
+	assign_menu_sub(&scene->ml->menu_array[mn],ypad,xpad,offy,offx);
 }
 
 void set_smenu_win(SCENE* scene, int mn, int pn)
@@ -426,9 +400,6 @@ WINDOW* scene_menu_win(SCENE* scene, int mn)
 		mvprintw(2,2,"Hey dumbass, menu %d doesn't exist ",mn);
 	return menu_win(scene->ml->menu_array[mn]);
 }
-
-
-
 /*void create_margin(WIN* win,int left, int right, int top, int bot)
 {
 
@@ -438,7 +409,6 @@ void create_border(WIN* win, int width, int height,char bchar)
 {
 
 }*/
-
 SCENE* init_scene(size_t panels, size_t menus)
 {
 	SCENE* scene = malloc(sizeof(SCENE));
@@ -455,17 +425,7 @@ SCENE* init_scene(size_t panels, size_t menus)
 	}
 	return scene;
 }
-
-
-
-
-
-
-
-
-
-
-void resize_handler(int sig)
+void resize_handler(SCENE* scene, int num,...)
 {
 	clear();
 	// unpost_menu(mm);

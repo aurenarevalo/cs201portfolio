@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"game",
+				"game_but"
+			],
+			[
+				"button_",
+				"button_win"
+			],
+			[
+				"newwin",
+				"newwin_offset"
+			],
+			[
 				"set_menu_",
 				"set_menu_win"
 			],
@@ -64,28 +76,13 @@
 	"buffers":
 	[
 		{
+			"contents": "\n#include <stdlib.h>\n// #include \"winman.h\"\n// #include \"menumanager.h\"\n#include \"keycodes.h\"\n#include <ncurses.h>\n#include <string.h>\n#include <stdio.h>\n#include \"infection_ds.h\"\n#include \"gamemanager.h\"\n#include \"utility.h\"\n#include \"unistd.h\"\n#include <signal.h>\n#include \"scene.h\"\n#include \"button.h\"\n\n\n/*\n* Each node traveled needs to take a specific amount of time.\n* will help determining the cost of a path\n*\n*/\n\nvoid initialize_ncurses();\n\nvoid splash(int fade_delay,int print_delay);\n\nshort WINCOL;\nshort PLAYER_COLOR,ENEMY_COLOR,NEUTRAL;\n\n\nint main(int argc, char**args){\n\n/*\tGraph* g = init_Graph(4);\n\tnew_edge(&g,3,2);\n\tnew_edge(&g,1,2);\n\tintMatrix* m = construct_adj_matrix(g);\n\tprint_matrix(m);*/\n\tinitialize_ncurses();\n\t//splash(15,75);\n\n\t//MAIN MENU\n/*\tSCENE* mm = init_scene(2,2);\n\tadd_menu(mm,\"Play against AI\",\"Play locally\",\"Tutorial\",\"Options\",\"Exit\",NULL);\n\tadd_panel_offset(mm,\"menu\", 5, 5);\n\tset_smenu_winsub(mm,0,0,mm->ml->max_len+1,5,5,mm->ml->max_len);\n\tbox(scene_menu_win(mm,0),0,0);\n\tmvwhline(scene_menu_win(mm,0),2,0,ACS_LTEE,1);\n\tmvwhline(scene_menu_win(mm,0),2,1,ACS_HLINE,73);\n\tset_menu_back(mm->ml->menu_array[0],COLOR_PAIR(3));\n\twbkgd(menu_win(mm->ml->menu_array[0]),COLOR_PAIR(1));\n\tpost_menu(mm->ml->menu_array[0]);*/\n\t\n\t/*TO DO\n\n\t1. Write a menu returning fun\n\t2. new resize handler\n\t3. ensure error handling\n\n\t*/\n\n\t//GAMEPLAY\n\n\tSCENE* game = init_scene(2,0);\n\tadd_panel_offset(game,\"game grid\",5,10);\n\tgameGrid* gg = generate_gameGrid(game->pl->panel_array[0]);\n\tbox(scene_window(game,0),0,0);\n\tnodelay(scene_window(game,0),TRUE);\n\tkeypad(scene_window(game,0),TRUE);\n\tmousemask(ALL_MOUSE_EVENTS,NULL);\n\t// BUTTON* button = new_button(scene_window(game,0),2,2,2,3);\n\t// BUTTON* button[4];\n\tint j =0;\n/*\tfor(int i=0; i<4;i++)\n\t{\n\t\t// while(gg->node[j].control == 9 || gg->node[j].control == 4) j++;\n\t\tbutton[i] = new_button(scene_window(game,0),gg->node[i].pos.y*2+1,gg->node[i].pos.x*3+1,2,3);\n\t\twbkgd(button_win(button[i]),COLOR_PAIR(3));\n\t}*/\n\t// button[i] = new_button(scene_window(game,0),2*i+1,3*i+1,2,3);\n\t// box(button_win(button),0,0);\n\t// bkgd(COLOR_PAIR(6))\n\tMEVENT event;\n\tint ch;\t\n\twhile((ch=wgetch(scene_window(game,0)))!=122){\n\t\tint mouse_x, mouse_y;\n\t\tswitch(ch)\n\t\t{\n\t\t\tcase KEY_MOUSE:\n\t\t\tif(getmouse(&event) == OK)\n\t\t\t{\t\n\t\t\t\t// mk1_check(gg,event);\n\t\t\t\tif(event.bstate & BUTTON1_PRESSED)\n\t\t\t\t{\n\t\t\t\t\tmk1_check(gg,event);\n\t\t\t\t\tprintw(\",,,...%d...,,,\",gg->nodes);\n\t\t\t\t\t// printw(\"\\\\.%d, %d | %d, %d ./\", event.x,event.y,gg->node[0]->node_but->x,gg->node[0]->node_but->y);\n\t\t\t\t\tif(is_button_press(event,gg->node[0]->node_but)){\n\t\t\t\t\t\tprintw(\"BUTTON 1 PRESSED!\");\n\t\t\t\t\t\t\n\t\t\t\t\t\twbkgd(button_win(gg->node[0]->node_but),COLOR_PAIR(4));\n\t\t\t\t\t\twrefresh(button_win(gg->node[0]->node_but));\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tbreak;\n\t\t}\n\t\t// refresh();\n\n\t\trefresh_nodes(&gg);\n\t\t/*for(int i=0; i<gg->nodes-1; i++)\n\t\t{\n\t\t\t// printf(\"%d\\n\",i);\n\t\t\t// wrefresh(button_win(gg->node[i]->node_but));\n\t\t}*/\n\n\t\tupdate_panels();\n\t\tdoupdate();\n\t}\n\n\t// SCENE* game = init_scene(s2,2);\n\n\n\trefresh();\n\tupdate_panels();\n\tdoupdate();\n\t// menu_loop(mm,0);\n\t// getch();\n\trefresh();\n\tendwin();\n\tprint_matrix(gg->parent);\n}\n\n\nvoid initialize_ncurses(){\n\t//initialize ncurses screen, allow color, disable line buffering, no echo of input, no cursor\n\tinitscr();\n\tstart_color();\n\tcbreak();\n\tnoecho();\n\tcurs_set(false);\n\t// nodelay(stdscr,TRUE);\n\tWINCOL = 9;\n\tPLAYER_COLOR=10;\n\tENEMY_COLOR=11;\n\tNEUTRAL=12;\n\tinit_color(COLOR_BLACK,0,0,0);\n\tinit_color(WINCOL,600,600,600);\n\tinit_color(COLOR_WHITE,800,800,800);\n\tinit_color(PLAYER_COLOR,0,600,600);\n\tinit_color(ENEMY_COLOR,600,600,0);\n\tinit_color(NEUTRAL,600,0,600);\n\t//Black text, white bg\n\tinit_pair(1,COLOR_BLACK,COLOR_WHITE);\n\tinit_pair(2,COLOR_WHITE,COLOR_BLACK);\n\tinit_pair(3,COLOR_BLACK,WINCOL);\n\t//color pair 4 is for errors\n\tinit_pair(4,COLOR_WHITE,COLOR_RED);\n\tinit_pair(5,COLOR_WHITE,PLAYER_COLOR);\n\tinit_pair(6,COLOR_WHITE,ENEMY_COLOR);\n\tinit_pair(7,COLOR_WHITE,NEUTRAL);\n\t// bkgd(COLOR_PAIR(1));\n\t// nodelay(mm_win,TRUE);\n\t// nodelay(stdscr,TRUE);\n\t// keypad(mm_win,TRUE);\n\t// keypad(stdscr,TRUE);\n}\n\n\nvoid splash(int fade_delay,int print_delay)\n{\n\n\tprintw(\"\\nPlease note that the windows resize with the terminal,\");\n\tprintw(\" but some terminal sizes may not be optimal for the game\");\n\trefresh();\n\tnapms(2000);\n\tclear();\n\tFILE* f = fopen(\"splash.txt\",\"r\");\n\tchar c;\n\tchar buf[100];\n\tint i=0;\n\twhile((c=fgetc(f))!=EOF)\n\t{\n\t\tif(c!='\\n')\n\t\t\tbuf[i++]=c;\n\t\telse\n\t\t{\t\n\t\t\tbuf[i]='\\n';\n\t\t\ti=0;\n\t\t\tprintw(\"%s\",buf);\n\t\t\tnapms(print_delay);\n\t\t\trefresh();\n\t\t\tchar tst[100] = {'\\0'};\n\t\t\tmemcpy(buf,tst,sizeof(tst));\n\t\t}\n\n\t}\n\tfclose(f);\n\tint interval = 800/100;\n\tint currcolor=800;\n\tbkgd(COLOR_PAIR(2));\n\tfor(int i = 0; i<100; i++)\n\t{\n\t\tinit_color(COLOR_WHITE,currcolor,currcolor,currcolor);\n\t\tcurrcolor-=interval;\n\t\trefresh();\n\t\tnapms(fade_delay);\n\t}\n\tinit_color(COLOR_WHITE,800,800,800);\n\tclear();\n\tnapms(1000);\n}",
 			"file": "main.c",
+			"file_size": 4861,
+			"file_write_time": 131973927884663233,
 			"settings":
 			{
-				"buffer_size": 2474,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "scene.h",
-			"settings":
-			{
-				"buffer_size": 2327,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "scene.c",
-			"settings":
-			{
-				"buffer_size": 12627,
+				"buffer_size": 4868,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -94,16 +91,72 @@
 			"file": "makefile",
 			"settings":
 			{
-				"buffer_size": 500,
+				"buffer_size": 509,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "winman.h",
+			"file": "button.c",
 			"settings":
 			{
-				"buffer_size": 1235,
+				"buffer_size": 802,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "button.h",
+			"settings":
+			{
+				"buffer_size": 355,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "#include \"gamemanager.h\"\n\nstatic unsigned int SD1 = 234234, SD2 = 21456789, SD3 = 0x7f0ce821;\n\ntypedef struct point Point;\n\ntypedef struct inode infectionNode;\n\ntypedef struct ggrid gameGrid;\n\ngameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan)\n{\n\t// printf(\"\\n\\n %d ROWS %d COLS %d NODES : %d possible NODES\\n\\n\\n\",r,c,nodes,r*c);\n\tgameGrid* gg = malloc(sizeof(gameGrid));\n\tgg->parent = init_intMatrix(r,c);\n\tgg->node = (infectionNode**)malloc(nodes*sizeof(infectionNode*));\n\tfor(int i=0; i<nodes; i++)\n\t\tgg->node[i] = init_infectionNode(0,-1);\n\tgg->nodes = nodes;\n\tgg->game_panel =game_pan;\n\treturn gg;\n\n}\n\ninfectionNode* init_infectionNode()\n{\n\tinfectionNode *node = malloc(sizeof(infectionNode));\n\tnode->control = -1;\n\tnode->units = -1;\n\tnode->pos.x = 0;\n\tnode->pos.y = 0;\n\tnode->node_but = malloc(sizeof(BUTTON));\n\tnode->al.head = NULL;\n\treturn node;\n}\n\nvoid place_node(gameGrid** grid,infectionNode* node)\n{\n\tgameGrid* ggrid = *grid;\n\tint x,y;\n\tx = node->pos.x;\n\ty = node->pos.y;\n\tggrid->parent->m[y][x] = node->control;\n\tnode->node_but = new_button(panel_window(ggrid->game_panel),y*2+1,x*3+1,2,3);\n\tif(node->control == 1){\n\t\twbkgd(button_win(node->node_but),COLOR_PAIR(7));\n\t}\n\telse if(node->control == 2)\n\t\twbkgd(button_win(node->node_but),COLOR_PAIR(6));\n\telse if(node->control == 3)\n\t\twbkgd(button_win(node->node_but),COLOR_PAIR(5));\n\tmvwprintw(button_win(node->node_but),0,0,\"%d\",node->units);\n}\n\nvoid set_node_params(infectionNode* node,int contr, int units, int x, int y)\n{\n\tnode->control = contr;\n\tnode->units = units;\n\tnode->pos.x = x;\n\tnode->pos.y = y;\n\n}\nvoid add_new_node(gameGrid** grid, int contr, int units, int x, int y)\n{\n\tgameGrid *ggrid = *grid;\n\tggrid->nodes++;\n\tggrid->node = realloc(ggrid->node,ggrid->nodes*sizeof(infectionNode));\n\tset_node_params(ggrid->node[ggrid->nodes-1],contr,units,x,y);\n\tplace_node(grid,ggrid->node[ggrid->nodes-1]);\n}\n /*\n * pseudo rng that seems to maintain a decent distribution. \n * probably can figure out, mathematically, one that will do better... but whatev\n * inspired by the KISS algorithm, but uses time() so the same board wont be generated at startup\n */\n\nint rng(unsigned int max,unsigned int min)\n {\t\n\tunsigned long long x;\n\tunsigned int t = time(NULL);\n\tunsigned int m = 37;\n\t\tt ^= (t>>2); t ^= (t<<5); t^= (t<<10);\n\t\tSD1 ^= (SD1<<3); SD1^= (SD1>>8);\n\t\tSD2 ^= (SD2>>5); \n\t\tSD3 ^= (SD3>>8);\n\t\t x = (SD1*SD2 +SD3*SD1 + SD1*124567 + SD3)*t/3;\n\tint num = x%(max+1);\n\tif(num < min) return rng(max,min);\n\tprintf(\"%u\\n\",num);\t\n\treturn num;\n}\n/*\n* Finds the distance between two nodes. This is to help determine cost of movement.\n*/\nfloat find_distance(infectionNode n1, infectionNode n2)\n{\n\tfloat x1 = n1.pos.x, y1 = n1.pos.y;\n\tfloat x2 = n2.pos.x, y2 = n2.pos.y;\n\tfloat dx = x2-x1, dy = y2-y1;\n\tfloat dist = sqrt(pow(dx,2)+pow(dy,2));\n\tprintf(\"%f\\n\\n\", dist);\n\treturn dist;\n}\n\n/*\n* wow, what a function this will be\n* thinking about using a tree to store positions. easier to check \n*/\n\ngameGrid* generate_gameGrid(PANEL* game_pan)\n{\n\tint nrows, ncols, nodes;\n\tnrows = 7;//rng(MAX_ROWS,MIN_ROWS);\n\tncols = 7;//rng(MAX_COLS,MIN_COLS);\n\tnodes =4;// rng(MAX_NODES,MIN_NODES);\n\tgameGrid* gg = init_gameGrid(nrows,ncols,nodes,game_pan);\n\tncols--;nrows--;\n\tfor(int r=0; r<=nrows; r++){\n\t\tfor(int c=0; c<=ncols; c++){\n\t\t\tgg->parent->m[r][c] = 9;\n\t\t}\n\t}\n\t/*set_node_params(&gg->node[0],2,50,rng(ncols,0),rng(nrows,0));\n\tplace_node(&gg,gg->node[0]);\n\tset_node_params(&gg->node[1],3,50,rng(ncols,1),rng(nrows,1));\n\tplace_node(&gg,gg->node[1]);*/\n\t// add_new_node(&gg,3,50,1,1);\n\t// add_new_node(&gg,1,50,3,3);\n\t// add_new_node(&gg,2,50,5,5);\n\t// add_new_node(&gg,1,50,5,5);\n\tset_node_params(gg->node[0],2,50,5,5);\n\tplace_node(&gg,gg->node[0]);\n\tset_node_params(gg->node[1],3,50,1,1);\n\tplace_node(&gg,gg->node[1]);\n/*\tfor(int i=0; i<nodes; i++)\n\t{\n\t\tset_node_params(&gg->node[i],1,50,rng(ncols,0),rng(nrows,0));\n\t\tplace_node(&gg,gg->node[i]);\n\t\tprintf(\"%d\\n\",gg->node[i].pos.x);\n\t}*/\n\tset_node_params(gg->node[2],1,50,3,3);\n\tset_node_params(gg->node[3],1,50,5,1);\n\tplace_node(&gg,gg->node[2]);\n\tplace_node(&gg,gg->node[3]);\n\n\t// add_new_node(&gg,4,50,4,4);\n\t// add_new_node(&gg,4,50,2,2);\n\t// find_distance(gg->node[0],gg->node[1]);\n\n\n\treturn gg;\n}\n\n\nvoid refresh_nodes(gameGrid** gg)\n{\n\tgameGrid* ggt= *gg;\n\tfor(int i = 0; i< ggt->nodes; i++)\n\t{\t\n\t\tmvwprintw(button_win(ggt->node[i]->node_but),0,0,\"%d\",ggt->node[i]->units);\n\t\twrefresh(button_win(ggt->node[i]->node_but));\n\t}\n}\n\n\nvoid mk1_check(gameGrid* gg,MEVENT me)\n{\n\t\t\t// printw(\"hello\");\nprintw(\"%d  | \",gg->nodes);\n\t\tfor(int i = 0; i< gg->nodes; i++)\n\t\t{\n\t\t\tprintw(\"%d  | \",i);\n\t\t\t// is_button_press(me,gg->node[i]->node_but);\n\t\t\tif(is_button_press(me,gg->node[i]->node_but))\n\t\t\t{\n\t\t\t\tprintw(\"BUTTON PRESSED!\");\n\t\t\t\twprintw(button_win(gg->node[i]->node_but),\"%d\",gg->node[i]->units);\n\t\t\t\twbkgd(button_win(gg->node[i]->node_but),COLOR_PAIR(4));\n\t\t\t\t// wrefresh(button_win(button));\n\t\t\t}\n\t\t}\n}\n",
+			"file": "gamemanager.c",
+			"file_size": 4915,
+			"file_write_time": 131973995738698160,
+			"settings":
+			{
+				"buffer_size": 4916,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "gamemanager.h",
+			"settings":
+			{
+				"buffer_size": 1855,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "infection_ds.h",
+			"settings":
+			{
+				"buffer_size": 648,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utility.h",
+			"settings":
+			{
+				"buffer_size": 274,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "scene.h",
+			"settings":
+			{
+				"buffer_size": 2554,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -142,17 +195,22 @@
 	"expanded_folders":
 	[
 		"/home/auren/projects/cs201portfolio",
-		"/home/auren/projects/cs201portfolio/src"
+		"/home/auren/projects/cs201portfolio/src",
+		"/home/auren/projects/cs201portfolio/test",
+		"/home/auren/projects/cs201portfolio/userlib"
 	],
 	"file_history":
 	[
+		"/home/auren/projects/cs201portfolio/src/winman.h",
+		"/home/auren/projects/cs201portfolio/src/utility.h",
+		"/home/auren/projects/cs201portfolio/src/utility.c",
 		"/home/auren/projects/cs201portfolio/src/scene.c",
+		"/home/auren/projects/cs201portfolio/src/scene.h",
+		"/home/auren/projects/cs201portfolio/src/makefile",
+		"/home/auren/projects/cs201portfolio/src/splash.txt",
 		"/home/auren/projects/cs201portfolio/src/infection_ds.h",
 		"/home/auren/projects/cs201portfolio/src/infection_ds.c",
-		"/home/auren/projects/cs201portfolio/src/splash.txt",
 		"/home/auren/projects/cs201portfolio/src/portfolio.sublime-project",
-		"/home/auren/projects/cs201portfolio/src/makefile",
-		"/home/auren/projects/cs201portfolio/src/winman.h",
 		"/home/auren/projects/cs201portfolio/src/menumanager.h",
 		"/home/auren/projects/cs201portfolio/src/test.txt",
 		"/home/auren/projects/cs201portfolio/src/gamemanager.c",
@@ -160,8 +218,6 @@
 		"/home/auren/projects/cs201portfolio/src/winman.c",
 		"/home/auren/projects/cs201portfolio/src/menumanager.c",
 		"/home/auren/projects/cs201portfolio/src/stdlibs.txt",
-		"/home/auren/projects/cs201portfolio/src/utility.h",
-		"/home/auren/projects/cs201portfolio/src/utility.c",
 		"/home/auren/projects/cs201portfolio/src/gamemanager.h",
 		"/home/auren/projects/cs201portfolio/main.c",
 		"/home/auren/projects/cs201portfolio/struct.c",
@@ -190,7 +246,7 @@
 	],
 	"find":
 	{
-		"height": 49.0
+		"height": 46.0
 	},
 	"find_in_files":
 	{
@@ -205,6 +261,19 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"game_but",
+			"infection_node",
+			"gg",
+			"add_panel",
+			"add_",
+			"sc",
+			"init_ene",
+			"sc",
+			"pl",
+			"->",
+			"item_items",
+			"item_",
+			"/*\n",
 			"printf",
 			"372",
 			"D",
@@ -239,7 +308,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 4,
 			"sheets":
 			[
 				{
@@ -248,15 +317,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2474,
+						"buffer_size": 4868,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1253,
-								1253
+								2620,
+								2620
 							]
 						],
 						"settings":
@@ -265,85 +334,27 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1316.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "scene.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2327,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1820,
-								1820
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 2100.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "scene.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 12627,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9086,
-								9086
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 11505.0,
+						"translation.y": 1966.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 1,
 					"file": "makefile",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 500,
+						"buffer_size": 509,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								141,
-								141
+								199,
+								199
 							]
 						],
 						"settings":
@@ -354,24 +365,110 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "winman.h",
+					"buffer": 2,
+					"file": "button.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1235,
+						"buffer_size": 802,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								407,
-								407
+								524,
+								524
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 113.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "button.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 355,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								72,
+								72
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "gamemanager.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4916,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4916,
+								4916
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 4111.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "gamemanager.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1855,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1855,
+								1855
 							]
 						],
 						"settings":
@@ -380,10 +477,95 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 762.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "infection_ds.h",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 648,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 69.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "utility.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 274,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								124,
+								124
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "scene.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2554,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1885,
+								1885
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1422.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
 					"type": "text"
 				}
 			]
@@ -391,7 +573,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 35.0
+		"height": 34.0
 	},
 	"input":
 	{
@@ -428,7 +610,7 @@
 	"project": "portfolio.sublime-project",
 	"replace":
 	{
-		"height": 66.0
+		"height": 64.0
 	},
 	"save_all_on_build": true,
 	"select_file":

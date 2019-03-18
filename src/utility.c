@@ -59,3 +59,35 @@ int binary_search(int arr[], int arr_size, int key)
 	if(curr_num!=key) return -1;
 	return indx;
 }
+
+void menu_loop(SCENE* scene,int mn)
+{
+	if(scene->has_menus == false)
+	{
+		printw("No menus ya fool");
+		return;
+	}
+
+	int ch=0;
+	keypad(scene_menu_win(scene,mn),TRUE);
+	nodelay(scene_menu_win(scene,mn),TRUE);
+	while(ch!=122)
+	{
+		ch=wgetch(scene_menu_win(scene,mn));
+		switch(ch)
+		{
+			case KEY_UP:
+				menu_driver(scene->ml->menu_array[mn],REQ_UP_ITEM);
+			break;
+			case KEY_DOWN:
+				menu_driver(scene->ml->menu_array[mn],REQ_DOWN_ITEM);
+			break;
+		}
+		refresh();
+		post_menu(scene->ml->menu_array[mn]);
+		doupdate();
+		update_panels();
+	}
+	keypad(scene_menu_win(scene,mn),FALSE);
+	nodelay(scene_menu_win(scene,mn),FALSE);
+}

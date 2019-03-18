@@ -8,15 +8,16 @@ typedef struct inode infectionNode;
 
 typedef struct ggrid gameGrid;
 
-gameGrid* init_gameGrid(int r, int c, int nodes)
+gameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan)
 {
-	printf("\n\n %d ROWS %d COLS %d NODES : %d possible NODES\n\n\n",r,c,nodes,r*c);
+	// printf("\n\n %d ROWS %d COLS %d NODES : %d possible NODES\n\n\n",r,c,nodes,r*c);
 	gameGrid* gg = malloc(sizeof(gameGrid));
 	gg->parent = init_intMatrix(r,c);
-	gg->node = malloc(nodes*sizeof(infectionNode));
+	gg->node = (infectionNode**)malloc(nodes*sizeof(infectionNode*));
 	for(int i=0; i<nodes; i++)
-		gg->node[i] = *init_infectionNode(0,-1);
+		gg->node[i] = init_infectionNode(0,-1);
 	gg->nodes = nodes;
+	gg->game_panel =game_pan;
 	return gg;
 
 }
@@ -28,17 +29,27 @@ infectionNode* init_infectionNode()
 	node->units = -1;
 	node->pos.x = 0;
 	node->pos.y = 0;
+	node->node_but = malloc(sizeof(BUTTON));
 	node->al.head = NULL;
 	return node;
 }
 
-void place_node(gameGrid** grid,infectionNode node)
+void place_node(gameGrid** grid,infectionNode* node)
 {
 	gameGrid* ggrid = *grid;
 	int x,y;
-	x = node.pos.x;
-	y = node.pos.y;
-	ggrid->parent->m[y][x] = node.control;
+	x = node->pos.x;
+	y = node->pos.y;
+	ggrid->parent->m[y][x] = node->control;
+	node->node_but = new_button(panel_window(ggrid->game_panel),y*2+1,x*3+1,2,3);
+	if(node->control == 1){
+		wbkgd(button_win(node->node_but),COLOR_PAIR(7));
+	}
+	else if(node->control == 2)
+		wbkgd(button_win(node->node_but),COLOR_PAIR(5));
+	else if(node->control == 3)
+		wbkgd(button_win(node->node_but),COLOR_PAIR(6));
+	mvwprintw(button_win(node->node_but),0,0,"%d",node->units);
 }
 
 void set_node_params(infectionNode* node,int contr, int units, int x, int y)
@@ -54,7 +65,7 @@ void add_new_node(gameGrid** grid, int contr, int units, int x, int y)
 	gameGrid *ggrid = *grid;
 	ggrid->nodes++;
 	ggrid->node = realloc(ggrid->node,ggrid->nodes*sizeof(infectionNode));
-	set_node_params(&ggrid->node[ggrid->nodes-1],contr,units,x,y);
+	set_node_params(ggrid->node[ggrid->nodes-1],contr,units,x,y);
 	place_node(grid,ggrid->node[ggrid->nodes-1]);
 }
  /*
@@ -96,13 +107,13 @@ float find_distance(infectionNode n1, infectionNode n2)
 * thinking about using a tree to store positions. easier to check 
 */
 
-gameGrid* generate_gameGrid()
+gameGrid* generate_gameGrid(PANEL* game_pan)
 {
 	int nrows, ncols, nodes;
 	nrows = 7;//rng(MAX_ROWS,MIN_ROWS);
 	ncols = 7;//rng(MAX_COLS,MIN_COLS);
 	nodes =4;// rng(MAX_NODES,MIN_NODES);
-	gameGrid* gg = init_gameGrid(nrows,ncols,nodes);
+	gameGrid* gg = init_gameGrid(nrows,ncols,nodes,game_pan);
 	ncols--;nrows--;
 	for(int r=0; r<=nrows; r++){
 		for(int c=0; c<=ncols; c++){
@@ -113,9 +124,13 @@ gameGrid* generate_gameGrid()
 	place_node(&gg,gg->node[0]);
 	set_node_params(&gg->node[1],3,50,rng(ncols,1),rng(nrows,1));
 	place_node(&gg,gg->node[1]);*/
-	set_node_params(&gg->node[0],2,50,5,5);
+	// add_new_node(&gg,3,50,1,1);
+	// add_new_node(&gg,1,50,3,3);
+	// add_new_node(&gg,2,50,5,5);
+	// add_new_node(&gg,1,50,5,5);
+	set_node_params(gg->node[0],2,50,5,5);
 	place_node(&gg,gg->node[0]);
-	set_node_params(&gg->node[1],3,50,1,1);
+	set_node_params(gg->node[1],3,50,1,1);
 	place_node(&gg,gg->node[1]);
 /*	for(int i=0; i<nodes; i++)
 	{
@@ -123,16 +138,62 @@ gameGrid* generate_gameGrid()
 		place_node(&gg,gg->node[i]);
 		printf("%d\n",gg->node[i].pos.x);
 	}*/
-	set_node_params(&gg->node[2],1,50,3,3);
-	set_node_params(&gg->node[3],1,50,5,1);
+	set_node_params(gg->node[2],1,50,3,3);
+	set_node_params(gg->node[3],2,50,5,1);
 	place_node(&gg,gg->node[2]);
 	place_node(&gg,gg->node[3]);
 
-	add_new_node(&gg,4,50,4,4);
-	add_new_node(&gg,4,50,2,2);
-	find_distance(gg->node[0],gg->node[1]);
+	// add_new_node(&gg,4,50,4,4);
+	// add_new_node(&gg,4,50,2,2);
+	// find_distance(gg->node[0],gg->node[1]);
 
 
 	return gg;
 }
 
+
+void refresh_nodes(gameGrid** gg)
+{
+	gameGrid* ggt= *gg;
+	for(int i = 0; i< ggt->nodes; i++)
+	{	
+		mvwprintw(button_win(ggt->node[i]->node_but),0,0,"%d",ggt->node[i]->units);
+		wrefresh(button_win(ggt->node[i]->node_but));
+	}
+}
+
+int is_player_node(infectionNode* node)
+{
+	return (node->control == 2);
+}
+
+int mk1_check(gameGrid* gg,MEVENT me)
+{
+		for(int i = 0; i< gg->nodes; i++)
+		{
+			infectionNode* node = gg->node[i];
+			if(is_button_press(me,node->node_but))
+			{
+				// printw("BUTTON PRESSED!");
+				if(is_player_node(node)){
+					printw("is a player node");
+					return i;
+				}
+				// add_units(gg,i,10);
+				mvwprintw(button_win(gg->node[i]->node_but),0,0,"%d",gg->node[i]->units);
+				wbkgd(button_win(gg->node[i]->node_but),COLOR_PAIR(4));
+				// wrefresh(button_win(button));
+			}
+		}
+	return -1;
+}
+
+void add_units(gameGrid* gg, int node, int units)
+{
+	gg->node[node]->units += units;
+}
+
+void sub_units(gameGrid* gg,int node, int units)
+{
+	gg->node[node]->units -= units;
+}
