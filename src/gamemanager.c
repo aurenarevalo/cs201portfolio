@@ -78,7 +78,7 @@ int rng(unsigned int max,unsigned int min)
  {	
 	unsigned long long x;
 	unsigned int t = time(NULL);
-	unsigned int m = 37;
+	// unsigned int m = 37;
 		t ^= (t>>2); t ^= (t<<5); t^= (t<<10);
 		SD1 ^= (SD1<<3); SD1^= (SD1>>8);
 		SD2 ^= (SD2>>5); 
@@ -161,39 +161,316 @@ void refresh_nodes(gameGrid** gg)
 		wrefresh(button_win(ggt->node[i]->node_but));
 	}
 }
-
-int is_player_node(infectionNode* node)
+//returns if node is a player node or not
+int is_player_node(gameGrid* gg, int node)
 {
-	return (node->control == 2);
+	return (gg->node[node]->control == 2);
+}
+//returns if node is a neutral node or not
+int is_neutral_node(gameGrid* gg, int node)
+{
+	return (gg->node[node]->control == 1);
 }
 
+// ALSO used for player2 identification!
+int is_enemy_node(gameGrid* gg, int node)
+{
+	return (gg->node[node]->control == 3);
+}
+
+//Check mouse button 1 click (down) is within bounds of a button. Returns the button node.
 int mk1_check(gameGrid* gg,MEVENT me)
 {
 		for(int i = 0; i< gg->nodes; i++)
 		{
+			printw(" - %d  %d ", i,gg->nodes);
 			infectionNode* node = gg->node[i];
 			if(is_button_press(me,node->node_but))
 			{
-				// printw("BUTTON PRESSED!");
-				if(is_player_node(node)){
-					printw("is a player node");
-					return i;
-				}
-				// add_units(gg,i,10);
-				mvwprintw(button_win(gg->node[i]->node_but),0,0,"%d",gg->node[i]->units);
-				wbkgd(button_win(gg->node[i]->node_but),COLOR_PAIR(4));
-				// wrefresh(button_win(button));
+				// printw(" - %d  %d ", i,gg->nodes);
+				// mvwprintw(button_win(gg->node[i]->node_but),0,0,"%d",gg->node[i]->units);
+				return i;
 			}
 		}
 	return -1;
 }
 
-void add_units(gameGrid* gg, int node, int units)
+/*
+* Returns value depending on situtation
+* If units > 100, returns 1
+* if units < 0, returns 2
+* else, returns 0
+*/
+int check_units(gameGrid* gg, int node)
 {
-	gg->node[node]->units += units;
+	if(gg->node[node]->units >=MAX_UNITS)
+	{
+		gg->node[node]->units = MAX_UNITS;
+		return 1;
+	}
+	if(gg->node[node]->units <10) wclear(button_win(gg->node[node]->node_but));
+	if (gg->node[node]->units < 0)
+		return 2;
+	return 0;
+}
+//changes control of node and sets color accordingly
+void change_control(gameGrid* gg, int node, int new_control, int overflow)
+{
+	gg->node[node]->control = new_control;
+	if(gg->node[node]->units < 0) gg->node[node]->units = overflow;
+	switch(new_control)
+	{
+		case 2:
+			wbkgd(button_win(gg->node[node]->node_but),COLOR_PAIR(5));
+		break;
+		case 3:
+			wbkgd(button_win(gg->node[node]->node_but),COLOR_PAIR(6));
+		break;
+	}
+	refresh_nodes(&gg);
 }
 
-void sub_units(gameGrid* gg,int node, int units)
+/*void set_units(gameGrid* gg, int node, int units)
+{
+	gg->
+}*/
+
+int add_units(gameGrid* gg, int node, int units)
+{
+	gg->node[node]->units += units;
+	if(gg->node[node]->units > MAX_UNITS) return (gg->node[node]->units - MAX_UNITS);
+	return 0;
+	
+	// if()
+}
+
+int sub_units(gameGrid* gg,int node, int units)
 {
 	gg->node[node]->units -= units;
+	if(gg->node[node]->units< 0) return (-1*(gg->node[node]->units));
+	
+	return 0;
+}
+
+
+
+/*enum get_game_state()
+{
+
+}*/
+
+void GAME_LOOP_AI(gameGrid* gg)
+{
+	int input;
+
+	GAME_STATES_AI gsai = TURN_PLAYER;
+	mousemask(ALL_MOUSE_EVENTS,NULL);
+	MEVENT event;
+
+/*	NEW_GAME,
+	SELECT_NODE_PLAYER,
+	SELECT_NODE_AI,
+	WEIGH_OPTIONS_AI,
+	TURN_PLAYER,
+	TURN_AI,
+	SEND_UNITS_PLAYER,
+	SEND_UNITS_AI,
+	END_TURN,
+	PLAYER_WIN,
+	AI_WIN*/
+	
+	/*
+	*	AI flow: The AI will select one of its nodes at random,
+	*	It will then weigh it's options and proceed to attack
+	*
+	*/
+	
+	
+	/*
+		ADD A CONFIRMATION FOR SENDING UNITS. TELL PLAYER HOW MANY TURNS IT WILL TAKE TO GET THERE.
+		IF POSSIBLE ADD VISUAL SHOWING WHERE UNITS ARE.
+	*/
+	int units = 10;
+	int unit_gen = 5;
+	
+	nodelay(panel_window(gg->game_panel),TRUE);
+	
+	int selected=-1, dest=-1;
+	while((input=wgetch(panel_window(gg->game_panel)))!=122)
+	{
+		switch(input){
+			default:
+			case KEY_MOUSE:
+			
+			if(1){
+				switch(gsai)
+				{
+					case NEW_GAME_AI: //implement regeneration of board
+					
+					break;
+					
+					case TURN_PLAYER:
+						wclear(stdscr);
+						mvprintw(0,0,"Player turn");
+						gsai = SELECT_NODE_PLAYER;
+						
+					break;
+					
+					case TURN_AI:
+						wclear(stdscr);
+						mvprintw(0,0,"Computer turn");
+						gsai=SELECT_NODE_AI;
+						
+					break;
+					
+					case SELECT_NODE_PLAYER:
+						if(getmouse(&event) == OK)
+						{
+							selected = mk1_check(gg,event);
+							if(!(selected<0))
+							{
+									
+							if(event.bstate & BUTTON1_PRESSED)
+							{
+								printw(" oooooo");
+								
+								
+								if(is_player_node(gg,selected))
+								{
+									box(button_win(gg->node[selected]->node_but),0,0);
+									mvprintw(1,1,"node %d selected",selected);
+									units = gg->node[selected]->units/2;
+									mvprintw(1,1,"node %d selected %d",selected, units);
+									gsai = SEND_UNITS_PLAYER;
+								}
+								else{
+									mvprintw(0,0,"Not a player node");
+									selected=-1;
+								} 
+							}
+						}
+						}
+						// gsai = TURN_PLAYER;
+					break;
+					
+					case SELECT_NODE_AI:
+					
+					break;
+					
+					case WEIGH_OPTIONS_AI:
+					
+					break;
+					
+					
+					
+					case SEND_UNITS_PLAYER:
+						if(getmouse(&event) == OK)
+						{
+						if(event.bstate & BUTTON1_PRESSED)
+						{	
+							if((dest=mk1_check(gg,event))+1){
+								if(check_units(gg,dest)!=1)
+								{
+								wclear(button_win(gg->node[selected]->node_but));
+								if(dest != selected){
+									int extra_sub=0;
+									int extra_add=0;
+									sub_units(gg,selected,units);
+									if(is_neutral_node(gg,dest) || is_enemy_node(gg,dest))extra_sub = sub_units(gg,dest,units);
+									if(is_player_node(gg,dest)) extra_add = add_units(gg,dest,units);
+									
+									gsai = END_TURN_PLAYER;
+									if(check_units(gg,dest)==2)
+										change_control(gg,dest,2,extra_sub);
+									if(check_units(gg,dest) ==1){
+										add_units(gg,selected,extra_add);
+										gg->node[dest]->units =100;
+									}
+								}
+								else gsai = TURN_PLAYER;
+								
+								}
+								selected = -1; dest = -1;
+							}
+						}
+						}
+						
+					break;
+					
+					case SEND_UNITS_AI:
+					
+					break;
+					
+					case END_TURN_PLAYER:
+					
+					for(int i=0; i<gg->nodes;i++)
+						{
+							if(is_player_node(gg,i) ) {
+								add_units(gg,i,unit_gen);
+								check_units(gg,i);
+							}
+						}
+					gsai = TURN_PLAYER;
+					break;
+					case END_TURN_AI:
+					
+					break;
+					
+					case PLAYER_WIN:
+					
+					break;
+					
+					case AI_WIN:
+						
+					break;
+				}
+			
+			}
+		
+		
+			break;
+			
+			// default:
+		
+			// break;
+		
+		}
+		refresh_nodes(&gg);
+		update_panels();
+		doupdate();
+		// mvprintw(0,0,"           STATE: %d", gsai);
+	}
+}
+
+
+void GAME_LOOP_LOCAL(gameGrid* gg)
+{
+	int input;
+
+
+	// GAME_STATES_LOCAL gsl;
+
+	while((input=wgetch(panel_window(gg->game_panel)))!=122)
+	{
+		switch(input){	
+		case KEY_MOUSE:
+		/*	switch(gsl)
+			{
+				
+				
+				
+			}*/
+		
+		
+		
+		break;
+		
+		}
+		refresh_nodes(&gg);
+		update_panels();
+		doupdate();
+
+	}
+
+
 }

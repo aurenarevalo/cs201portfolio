@@ -13,6 +13,7 @@
 #include <signal.h>
 #include "scene.h"
 #include "button.h"
+// #include "gamestates.h"
 
 
 /*
@@ -31,11 +32,15 @@ short PLAYER_COLOR,ENEMY_COLOR,NEUTRAL;
 
 int main(int argc, char**args){
 
-/*	Graph* g = init_Graph(4);
-	new_edge(&g,3,2);
+	/*Graph* g = init_Graph(4);
+	new_edge(&g,3,0);
 	new_edge(&g,1,2);
+	new_edge(&g,2,3);
+	new_edge(&g,0,1);
 	intMatrix* m = construct_adj_matrix(g);
-	print_matrix(m);*/
+	*/
+	
+	
 	initialize_ncurses();
 	//splash(15,75);
 
@@ -63,18 +68,28 @@ int main(int argc, char**args){
 
 	SCENE* game = init_scene(2,0);
 	add_panel_offset(game,"game grid",5,10);
+
 	gameGrid* gg = generate_gameGrid(game->pl->panel_array[0]);
 	box(scene_window(game,0),0,0);
-	nodelay(scene_window(game,0),TRUE);
+	// nodelay(scene_window(game,0),TRUE);
 	keypad(scene_window(game,0),TRUE);
-	mousemask(ALL_MOUSE_EVENTS,NULL);
+	keypad(stdscr,TRUE);
+	// mousemask(ALL_MOUSE_EVENTS,NULL);
 	
 	int selected_node = -1,dest_node = -1; 
 
-	MEVENT event;
+	// MEVENT event;
 	int ch;	
-	while((ch=wgetch(scene_window(game,0)))!=122){
-		int mouse_x, mouse_y;
+	// USE NEW_GAME state to regenerate a board,  and reset everything. For now
+	//Starting on player turn.
+	GAME_LOOP_AI(gg);
+	
+	
+	
+	// free(game);
+	// free(gg);
+/*	while((ch=wgetch(scene_window(game,0)))!=122){
+		// int mouse_x, mouse_y;
 		switch(ch)
 		{
 			case KEY_MOUSE:
@@ -84,26 +99,40 @@ int main(int argc, char**args){
 					if(event.bstate & BUTTON1_PRESSED)
 					{
 						selected_node = mk1_check(gg,event);
-						printw("node %d selected",selected_node);
+						if(is_player_node(gg,selected_node)){
+							box(button_win(gg->node[selected_node]->node_but),0,0);
+							mvprintw(0,0,"node %d selected",selected_node);
+						}
+						else
+						{
+							mvprintw(0,0,"not a player node");
+							// wclear(stdscr);
+						}
+						
 						// wattron()
-						box(button_win(gg->node[selected_node]->node_but),0,0);
+						
 					}
 				}
 				else
 				{
 					if(event.bstate & BUTTON1_PRESSED)
 					{
+						wclear(button_win(gg->node[selected_node]->node_but));
 						if(mk1_check(gg,event) == selected_node){
 							printw("**cancelled selection");
-							wclear(button_win(gg->node[selected_node]->node_but));
+							
 							selected_node=-1;
 						}
 						else
 						{
-							/*
-							* Logic for sending units
-							*/
+							dest_node = mk1_check(gg,event);
+							// printw("**DEST NODE: %d **",dest_node);
+							sub_units(gg,dest_node,10);
+							selected_node=-1;
+							dest_node=-1;
+							// wclear(button_win(gg->node[selected_node]->node_but));
 						}
+						
 					}
 				}
 			}
@@ -112,15 +141,10 @@ int main(int argc, char**args){
 		// refresh();
 
 		refresh_nodes(&gg);
-		/*for(int i=0; i<gg->nodes-1; i++)
-		{
-			// printf("%d\n",i);
-			// wrefresh(button_win(gg->node[i]->node_but));
-		}*/
 
 		update_panels();
 		doupdate();
-	}
+	}*/
 
 	// SCENE* game = init_scene(s2,2);
 
@@ -133,6 +157,7 @@ int main(int argc, char**args){
 	refresh();
 	endwin();
 	print_matrix(gg->parent);
+	// print_matrix(m);
 }
 
 

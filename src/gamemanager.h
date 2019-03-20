@@ -7,7 +7,7 @@
 #include "infection_ds.h"
 #include "utility.h"
 #include "button.h"
-
+#include "gamestates.h"
 
 #define MAX_UNITS 100
 #define MAX_ROWS 15
@@ -84,11 +84,30 @@ gameGrid* generate_gameGrid(PANEL* game_pan);
 
 void refresh_nodes(gameGrid** gg);
 
-int is_player_node(infectionNode* node);
+int is_player_node(gameGrid* gg, int node);
+
+//returns if node is a neutral node or not
+int is_neutral_node(gameGrid* gg, int node);
+
+
+// ALSO used for player2 identification!
+int is_enemy_node(gameGrid* gg, int node);
 
 int mk1_check(gameGrid* gg,MEVENT me);
 
-void add_units(gameGrid* gg,int node, int units);
+int check_units(gameGrid* gg, int node);
 
-void sub_units(gameGrid* gg,int node, int units);
+void change_control(gameGrid* gg, int node, int new_control, int overflow);
+
+// void set_units(gameGrid* gg, int node, int units);
+
+int add_units(gameGrid* gg,int node, int units);
+
+
+int sub_units(gameGrid* gg,int node, int units);
+
+
+void GAME_LOOP_AI(gameGrid* gg);
+
+void GAME_LOOP_LOCAL(gameGrid* gg);
 
