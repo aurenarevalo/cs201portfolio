@@ -4,12 +4,20 @@ typedef struct anode adjNode;
 typedef struct alist adjList;
 typedef struct grph Graph;
 
-
+adjNode* init_adjNode()
+{
+	adjNode* an = malloc(sizeof(adjNode));
+	an->adj = -1;
+	an->weight = 0;
+	an->next = NULL;
+	return an;
+}
 adjList* init_adjList()
 {
 	adjList* al=malloc(sizeof(adjList));
 	al->head = malloc(sizeof(adjNode));
 	al->head->adj = -1;
+	al->head->weight = 0;
 	al->head->next = NULL;
 	return al;
 }
@@ -21,13 +29,12 @@ Graph* init_Graph(int v)
 	g->arr = calloc(v,sizeof(adjList));
 	for(int i = 0; i<v;i++)
 		g->arr[i] = *init_adjList();
-
 	return g;
 }
 /*
 * MAKE SURE TO CHECK FOR MEMORY LEAKS!!!!
 */
-void new_node(adjList* al, int to)
+void new_node(adjList* al, int to, int w)
 {
 	adjNode* tmp_head = al->head;
 	adjNode* tmp_traverse = al->head;
@@ -35,6 +42,7 @@ void new_node(adjList* al, int to)
 	if(tmp_head->adj == -1)
 	{
 		node->adj = to;
+		node->weight = w;
 		node->next = NULL;
 		*tmp_head = *node;
 		return;
@@ -46,12 +54,13 @@ void new_node(adjList* al, int to)
 		tmp_traverse= tmp_traverse->next;
 	}
 	node->adj = to;
+	node->weight = w;
 	node->next = NULL;
 	tmp_traverse->next = node;
 	al->head = tmp_head;
 }
 
-void new_edge(Graph** gr,int from, int to)
+void new_edge(Graph** gr,int from, int to,int w)
 {
 	Graph* g= *gr;
 	if((g->vertices < from || g->vertices < to) || (from < 0 || to < 0))
@@ -60,7 +69,7 @@ void new_edge(Graph** gr,int from, int to)
 		return;
 	}
 	adjList *tmp_list = g->arr;
-	new_node(&tmp_list[from],to);
+	new_node(&tmp_list[from],to,w);
 	g->arr[from] = tmp_list[from];
 }
 

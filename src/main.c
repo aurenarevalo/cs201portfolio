@@ -156,7 +156,8 @@ int main(int argc, char**args){
 	// getch();
 	refresh();
 	endwin();
-	print_matrix(gg->parent);
+	intMatrix* gm = construct_adj_matrix(gg->game_graph);
+	print_matrix(gm);
 	// print_matrix(m);
 }
 

@@ -18,6 +18,7 @@ gameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan)
 		gg->node[i] = init_infectionNode(0,-1);
 	gg->nodes = nodes;
 	gg->game_panel =game_pan;
+	gg->game_graph = init_Graph(nodes);
 	return gg;
 
 }
@@ -71,7 +72,7 @@ void add_new_node(gameGrid** grid, int contr, int units, int x, int y)
  /*
  * pseudo rng that seems to maintain a decent distribution. 
  * probably can figure out, mathematically, one that will do better... but whatev
- * inspired by the KISS algorithm, but uses time() so the same board wont be generated at startup
+ * inspired by the KISS rng algorithm, but uses time() so the same board wont be generated at startup
  */
 
 int rng(unsigned int max,unsigned int min)
@@ -106,6 +107,43 @@ float find_distance(infectionNode n1, infectionNode n2)
 * wow, what a function this will be
 * thinking about using a tree to store positions. easier to check 
 */
+
+/*void find_adjacencies(gameGrid *gg)
+{
+	int r = gg->parent->r, c = gg->parent->c;
+	int **m = gg->parent->m;
+	for(int i=0;i<gg->nodes;i++)
+	{
+		int y = gg->node[i]->pos.y;
+		int x = gg->node[i]->pos.x;
+		for(int row=-1; row<2; row++)
+		{
+			for(int col=-1; col<2; col++){
+				int in_bounds = (((col+x) >= 0 && (col+x) <c)
+					&& ((row+y) >=0 && (row+y) < r));
+				if(in_bounds)
+				{
+					if(m[row+y][col+x] == 4)
+					{
+						y=row+y
+					}
+				}
+			}
+		}
+		
+		
+	}
+}*/
+
+void add_adjacency(gameGrid** gg, int from, int to)
+{
+	gameGrid* ggt = *gg;
+	float dist = find_distance(*ggt->node[from],*ggt->node[to]);
+	new_edge(&ggt->game_graph,to,from,dist);
+	new_edge(&ggt->game_graph,from,to,dist);
+}
+
+// void connect_nodes
 
 gameGrid* generate_gameGrid(PANEL* game_pan)
 {
@@ -142,7 +180,11 @@ gameGrid* generate_gameGrid(PANEL* game_pan)
 	set_node_params(gg->node[3],2,50,5,1);
 	place_node(&gg,gg->node[2]);
 	place_node(&gg,gg->node[3]);
-
+	add_adjacency(&gg,0,3);
+	add_adjacency(&gg,0,2);
+	add_adjacency(&gg,2,1);
+	add_adjacency(&gg,1,3);
+	add_adjacency(&gg,2,3);
 	// add_new_node(&gg,4,50,4,4);
 	// add_new_node(&gg,4,50,2,2);
 	// find_distance(gg->node[0],gg->node[1]);
@@ -252,13 +294,17 @@ int sub_units(gameGrid* gg,int node, int units)
 	return 0;
 }
 
-
+void check_win_condition();
 
 /*enum get_game_state()
 {
 
 }*/
 
+int select_node(gameGrid *gg, MEVENT event,int control_select,)
+{
+	
+}
 void GAME_LOOP_AI(gameGrid* gg)
 {
 	int input;
@@ -354,11 +400,15 @@ void GAME_LOOP_AI(gameGrid* gg)
 					break;
 					
 					case SELECT_NODE_AI:
-					
+						// printw("AI thinking")
+						// napms(2000);
+						gsai=WEIGH_OPTIONS_AI;
 					break;
 					
 					case WEIGH_OPTIONS_AI:
-					
+						printw("AI thinking");
+						napms(2000);
+						gsai=SEND_UNITS_AI;
 					break;
 					
 					
@@ -398,7 +448,8 @@ void GAME_LOOP_AI(gameGrid* gg)
 					break;
 					
 					case SEND_UNITS_AI:
-					
+						sub_units(gg,0,10);
+						gsai=END_TURN_AI;
 					break;
 					
 					case END_TURN_PLAYER:
@@ -410,10 +461,11 @@ void GAME_LOOP_AI(gameGrid* gg)
 								check_units(gg,i);
 							}
 						}
-					gsai = TURN_PLAYER;
+						
+					gsai = TURN_AI;
 					break;
 					case END_TURN_AI:
-					
+						gsai=TURN_PLAYER;
 					break;
 					
 					case PLAYER_WIN:

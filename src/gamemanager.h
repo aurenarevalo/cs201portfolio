@@ -45,15 +45,18 @@ typedef struct inode{
 	int control;
 	int units;
 	Point pos;
-	BUTTON* node_but;	
+	BUTTON* node_but;
+	// adjNode* anode;
 	adjList al;
 }infectionNode;
 
 typedef struct ggrid{
 	int nodes;
+	int n_p1,n_p2,n_neutral;
 	intMatrix *parent;
 	PANEL* game_panel;
 	infectionNode **node;
+	Graph* game_graph;
 }gameGrid;
 
 gameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan);
@@ -78,7 +81,7 @@ float find_distance(infectionNode n1, infectionNode n2);
 *	draw_connections(gameGrid*,) -- calls add_new_node
 */
 
-
+void add_adjacency(gameGrid** gg, int from, int to);
 
 gameGrid* generate_gameGrid(PANEL* game_pan);
 
