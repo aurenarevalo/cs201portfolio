@@ -15,10 +15,10 @@ void print_matrix(intMatrix *m)
 	printf("\n");
 	for(int r=0; r<rlim; r++)
 	{
-		printf("%d|",r);
+		printf("%f|",r);
 		for(int c=0; c<clim; c++){
 			if(m->m[r][c] != 9)
-				printf(" %d |  ",m->m[r][c]);
+				printf(" %f |  ",m->m[r][c]);
 			else
 				printf(" * |  ");
 		}

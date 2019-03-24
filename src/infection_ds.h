@@ -8,7 +8,7 @@
 #ifndef STRUCT_GUARD
 #define STRUCT_GUARD
 typedef struct anode{
-	int weight;
+	float weight;
 	int adj;
 	struct anode *next;
 }adjNode;
@@ -25,7 +25,7 @@ typedef struct grph{
 
 typedef struct imtrx{
 	int r,c;
-	int **m;
+	float **m;
 }intMatrix;
 
 adjNode* init_adjNode();
@@ -34,9 +34,9 @@ adjList* init_adjList();
 
 Graph* init_Graph();
 
-void new_node(adjList* al, int to, int w);
+void new_node(adjList* al, int to, float w);
 
-void new_edge(Graph** gr,int from, int to, int w);
+void new_edge(Graph** gr,int from, int to, float w);
 
 intMatrix* init_intMatrix(int r, int c);
 

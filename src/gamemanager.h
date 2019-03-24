@@ -52,7 +52,7 @@ typedef struct inode{
 
 typedef struct ggrid{
 	int nodes;
-	int n_p1,n_p2,n_neutral;
+	int n_p1,n_p2,n_neutral; //actually implement this
 	intMatrix *parent;
 	PANEL* game_panel;
 	infectionNode **node;
@@ -108,7 +108,8 @@ int add_units(gameGrid* gg,int node, int units);
 
 
 int sub_units(gameGrid* gg,int node, int units);
-
+float calc_base_weight(gameGrid *gg,int node);
+int calc_attack_AI(gameGrid* gg, int selected);
 
 void GAME_LOOP_AI(gameGrid* gg);
 

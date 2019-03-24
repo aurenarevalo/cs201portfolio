@@ -34,7 +34,7 @@ Graph* init_Graph(int v)
 /*
 * MAKE SURE TO CHECK FOR MEMORY LEAKS!!!!
 */
-void new_node(adjList* al, int to, int w)
+void new_node(adjList* al, int to, float w)
 {
 	adjNode* tmp_head = al->head;
 	adjNode* tmp_traverse = al->head;
@@ -60,7 +60,7 @@ void new_node(adjList* al, int to, int w)
 	al->head = tmp_head;
 }
 
-void new_edge(Graph** gr,int from, int to,int w)
+void new_edge(Graph** gr,int from, int to,float w)
 {
 	Graph* g= *gr;
 	if((g->vertices < from || g->vertices < to) || (from < 0 || to < 0))
@@ -78,9 +78,9 @@ intMatrix* init_intMatrix(int r, int c)
 	intMatrix* m = calloc(1,sizeof(intMatrix));
 	m->r = r;
 	m->c = c;
-	m->m = (int**)calloc(r,sizeof(int*));
+	m->m = (float**)calloc(r,sizeof(float*));
 	for(int i=0; i<r; i++)
-		m->m[i] = (int*)calloc(c,sizeof(int));
+		m->m[i] = (float*)calloc(c,sizeof(float));
 	return m;
 }
 
@@ -96,10 +96,10 @@ intMatrix* construct_adj_matrix(Graph* gr)
 		// if(tmp->adj == -1)break;
 		while(tmp->next != NULL)
 		{
-			mat->m[r][tmp->adj] = 1;
+			mat->m[r][tmp->adj] = tmp->weight;
 			tmp=tmp->next;
 		}
-		mat->m[r][tmp->adj] = 1;
+		mat->m[r][tmp->adj] =tmp->weight;
 
 	}
 	return mat;

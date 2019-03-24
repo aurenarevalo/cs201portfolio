@@ -76,16 +76,23 @@ int main(int argc, char**args){
 	keypad(stdscr,TRUE);
 	// mousemask(ALL_MOUSE_EVENTS,NULL);
 	
-	int selected_node = -1,dest_node = -1; 
+	// int selected_node = -1,dest_node = -1; 
 
 	// MEVENT event;
-	int ch;	
+	// int ch;	
 	// USE NEW_GAME state to regenerate a board,  and reset everything. For now
 	//Starting on player turn.
-	GAME_LOOP_AI(gg);
+	// GAME_LOOP_AI(gg);
+	// intMatrix
+	// int V=gg->game_graph->vertices;
+	// 	intMatrix* adj_mat = construct_adj_matrix(gg->game_graph); 
+	// int visited[V];
+	// int path[V];
+	// for(int i=0; i<V; i++) visited[i]=0,path[i]=0;
+	// int* dist_arr= malloc(V*sizeof(int));
+	//  DFS(adj_mat,2,visited,path,0);
 	
-	
-	
+
 	// free(game);
 	// free(gg);
 /*	while((ch=wgetch(scene_window(game,0)))!=122){
@@ -158,6 +165,10 @@ int main(int argc, char**args){
 	endwin();
 	intMatrix* gm = construct_adj_matrix(gg->game_graph);
 	print_matrix(gm);
+	// for(int i=0; i<V; i++)
+	// 	printf("%d\n",dist_arr[i]);
+	// DFS(adj_mat,2,visited,path,0);
+	
 	// print_matrix(m);
 }
 
