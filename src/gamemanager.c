@@ -454,6 +454,7 @@ void GAME_LOOP_AI(gameGrid* gg)
 					
 					case TURN_PLAYER:
 						wclear(stdscr);
+						//something useless
 						// mvprintw(0,0,"Player turn");
 						gsai = SELECT_NODE_PLAYER;
 						
