@@ -10,5 +10,5 @@ void print_matrix(intMatrix *m);
 
 int msb(unsigned int n);
 
-int binary_search(int arr[], int arr_size, int key);
+int binary_search(float arr[], int arr_size, int key);
 void menu_loop(SCENE* scene,int mn);

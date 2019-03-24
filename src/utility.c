@@ -34,7 +34,7 @@ int msb(unsigned int n)
 	return msb;
 }
 
-int binary_search(int arr[], int arr_size, int key)
+int binary_search(float arr[], int arr_size, int key)
 {
 /*	int *arr_tmp = malloc(arr_size*sizeof(int));
 	arr_tmp = &arr;*/
@@ -44,19 +44,20 @@ int binary_search(int arr[], int arr_size, int key)
 	int indx=(high-low)/2;
 	int curr_num = arr[indx];
 	// printf("%d, ",dindx);
-	while( (key != curr_num) && indx>=1)
+	while( (key != curr_num) && indx>=1 && high!=low)
 	{
 		if(curr_num > key)
 			high = indx;
-		if(curr_num<key)
+		else if(curr_num<key)
 			low = indx+1;
+		// else high += 1;
 		indx = (high+low)/2;
 		curr_num = arr[indx];
-		printf("%d\n",low);
+		// printf("%d\n",low);
 
 	}
-	printf("\n\n%d\n",curr_num);
-	if(curr_num!=key) return -1;
+	// printf("\n\n%d\n",curr_num);
+	// if(curr_num!=key) return -1;
 	return indx;
 }
 

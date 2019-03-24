@@ -87,7 +87,7 @@ int rng(unsigned int max,unsigned int min)
 		 x = (SD1*SD2 +SD3*SD1 + SD1*124567 + SD3)*t/3;
 	int num = x%(max+1);
 	if(num < min) return rng(max,min);
-	printf("%u\n",num);	
+	// printf("%u\n",num);	
 	return num;
 }
 /*
@@ -177,13 +177,14 @@ gameGrid* generate_gameGrid(PANEL* game_pan)
 		printf("%d\n",gg->node[i].pos.x);
 	}*/
 	set_node_params(gg->node[2],1,50,3,3);
-	set_node_params(gg->node[3],2,50,5,1);
+	set_node_params(gg->node[3],1,50,5,1);
 	place_node(&gg,gg->node[2]);
 	place_node(&gg,gg->node[3]);
 	add_adjacency(&gg,0,3);
 	add_adjacency(&gg,0,2);
 	add_adjacency(&gg,2,1);
 	add_adjacency(&gg,1,3);
+	add_adjacency(&gg,1,2);
 	add_adjacency(&gg,2,3);
 	// add_new_node(&gg,4,50,4,4);
 	// add_new_node(&gg,4,50,2,2);
@@ -225,7 +226,7 @@ int mk1_check(gameGrid* gg,MEVENT me)
 {
 		for(int i = 0; i< gg->nodes; i++)
 		{
-			printw(" - %d  %d ", i,gg->nodes);
+			// printw(" - %d  %d ", i,gg->nodes);
 			infectionNode* node = gg->node[i];
 			if(is_button_press(me,node->node_but))
 			{
@@ -251,7 +252,7 @@ int check_units(gameGrid* gg, int node)
 		return 1;
 	}
 	if(gg->node[node]->units <10) wclear(button_win(gg->node[node]->node_but));
-	if (gg->node[node]->units < 0)
+	if (gg->node[node]->units <= 0)
 		return 2;
 	return 0;
 }
@@ -282,8 +283,6 @@ int add_units(gameGrid* gg, int node, int units)
 	gg->node[node]->units += units;
 	if(gg->node[node]->units > MAX_UNITS) return (gg->node[node]->units - MAX_UNITS);
 	return 0;
-	
-	// if()
 }
 
 int sub_units(gameGrid* gg,int node, int units)
@@ -294,7 +293,23 @@ int sub_units(gameGrid* gg,int node, int units)
 	return 0;
 }
 
-void check_win_condition();
+// if return 1, player win, if 2 enemy win, return 0 else.
+int check_win_condition(gameGrid* gg)
+{	
+	int size = gg->game_graph->vertices;
+	int has_enemy=0, has_player=0;
+	for(int i=0; i<size; i++)
+	{	
+		// wprintw(panel_window(gg->game_panel),"---%d--- ",gg->node[i]->control);
+		if(gg->node[i]->control == 2) has_player=1;
+		if(gg->node[i]->control==3) has_enemy=1;
+	}
+	// wprintw(panel_window(gg->game_panel),"-.- %d, %d -.-",has_player,has_enemy);
+	if(has_player && !has_enemy) return 1;
+	if(has_enemy && !has_player) return 2;
+	
+	return 0;
+}
 
 /*enum get_game_state()
 {
@@ -339,21 +354,6 @@ int select_node(gameGrid *gg, MEVENT event,int control_select)
 // as reference
 int Djikstra(gameGrid *gg,int n,int start)
 {
-	int V = gg->game_graph->vertices;
-	intMatrix* adj_mat = construct_adj_matrix(gg);
-	int visited[V],dist[V][V];
-	for(int r=0; r<V; r++)
-	{
-		for(int c=0; c<V; c++)
-		{
-			if(adj_mat->m[r][c]==0)
-				dist[r][c] = INFINITY;
-			else
-				dist[r][c] = adj_mat->m[r][c];
-				
-		}
-	}
-	
 	
 	
 }
@@ -361,122 +361,45 @@ int Djikstra(gameGrid *gg,int n,int start)
 
 float calc_wieghts_from_node(gameGrid *gg,int node)
 {
-	int V = gg->game_graph
-	int weights[V];
-	//initialize weights to the unit value of each node
-	for (int i=0; i<V; i++)
-		weights[i] = gg->node[i]->weight;
-	weights[node]=-1;
-	
-	for(int i=0; i<V; i++)
-	{
-		if(i!=selected)
-		{
-			int contr = gg->node[i]->control;
-			if(contr==1) weights[i] += CTRL_W_N;
-			else if(contr==2) weights[i] += CTRL_W_P;
-			else if(contr==3 && units < 50) weights[i] += CTRL_W_SLT;
-			else if(contr==3 && units >= 50) weights[i] += CTRL_W_SGT;
-		}
-	}
-	return 0;
-// 	/*/*int contr = gg->node[node]->control;
-// 	int units = gg->node[node]->units;
-// 	// float dist_weight = gg->game_graph->
-// 	adjNode* tmp = gg->game_graph->arr[node].head;
-// /*	while(tmp->adj != node){
-// 		tmp = tmp->next;
-// 		if(tmp->next == NULL) return -1;
-// 	}*/
-	
-// 	float dist_weight =(tmp->weight/(float)sqrt(8));
-// 	dist_weight*=DIST_W_MULT;
-// 	float contr_weight;
-// 	if(contr==1)contr_weight = CTRL_W_N;
-// 	else if(contr==2) contr_weight = CTRL_W_P;
-// 	else if(contr==3 && units < 50) contr_weight = CTRL_W_SLT;
-// 	else if(contr==3 && units >= 50) contr_weight = CTRL_W_SGT;
-// 	int V = gg->game_graph->vertices;
-// /*	intMatrix* adj_mat = construct_adj_matrix(gg->game_graph); 
-// 	int visited[V];
-// 	for(int i=0; i<V; i++) visited[i]=0;
-// 	calc_total_dist(mat,)*/
-	
-// 	// int* dist_arr = DFS(adj_mat,node,visited,path,0);
-// 	return dist_weight+contr_weight+units;*/*/
 	
 }
 
 int calc_attack_AI(gameGrid* gg, int selected)
 {
-	
 	int V = gg->game_graph->vertices;
 	float weight[V];
+	float self_unit_weight;
 	for(int i=0; i<V; i++)
 		weight[i] = 0;
-	adjNode *curr = gg->game_graph->arr[selected]->head;
+	adjNode *curr = gg->game_graph->arr[selected].head;
 	int n=-1;
-	while(curr->next != NULL)
+	while(curr != NULL)
 	{
 		n=curr->adj;
+		int contr = gg->node[n]->control;
+		int units = gg->node[n]->units;
+		if(contr==1) weight[n] += CTRL_W_N;
+		else if(contr==2) weight[n] += CTRL_W_P;
+		else if(contr==3 && units < 50) weight[n] += CTRL_W_SLT;
+		else if(contr==3 && units >= 50) weight[n] += CTRL_W_SGT;
+		weight[n] += gg->node[n]->units/3;
 		curr = curr->next;
 	}
-	// float type_weight;
-	// float units_weight;
-	// float self_unit_weight;
-	// int units = gg->node[selected]->units;
-	
-	// if(units > 75) self_unit_weight = 0.5;
-	// else if (units > 50) self_unit_weight = 0.75;
-	// else if (units <= 25) self_unit_weight = 1.5;
-	// else self_unit_weight = 1;	
-	// float weights[V];
-	
-	// intMatrix* adj_mat = construct_adj_matrix(gg->game_graph); 
-	// int visited[V];
-	// int path[V];
-	// for(int i=0; i<V; i++) visited[i]=0,path[i]=0;
-	// int* dist_arr = DFS(adj_mat,selected,visited,path,0);
-	// calc_total_dist(mat,)
-	
-/*	for(int i = 0; i<V; i++)
-	{
-		if(i==selected) weights[i] = 0;
-		else weights[i] = self_unit_weight*calc_base_weight(gg,i);
+	int units = gg->node[selected]->units;
+	if(units > 75) self_unit_weight = 0.5;
+	else if (units > 50) self_unit_weight = 0.75;
+	else if (units <= 25) self_unit_weight = 1.5;
+	else self_unit_weight = 1;
+	int min=weight[0];
+	for(int i=1; i<V; i++){ 
+		if(min == 0 || weight[i] < min) min =weight[i];
+		weight[i] *= self_unit_weight;
+		printf("%f\n",weight[i]);
 	}
-	*/
-	//Implement Djikstras.
-	
-	// int visited[V];
-/*	float sp[V];
-	for(int i=0;i<V;i++)
-		sp[i] = INFINITY,visited[i]=-1;
-	sp[selected] = 0;
-	for(int i=0; i<V; i++)
-	{
-		
-		// else{
-			// if(!visited[i])
-			if(gg->parent->m[i][selected])
-			{
-				// if(!visited[i])
-				// {
-					
-				// }
-				adjNode* trav = gg->game_graph->arr[i].head;
-				while(trav->next!=NULL)
-				{
-					if(!visited[trav->adj])
-					{
-						
-					}
-				}
-				
-			
-			// }
-		}
-	}*/
-	return NULL;
+	int minindx = binary_search(weight,V,min);
+	// printf("\n%d",minindx);
+
+	return minindx;
 	
 }
 void GAME_LOOP_AI(gameGrid* gg)
@@ -531,14 +454,14 @@ void GAME_LOOP_AI(gameGrid* gg)
 					
 					case TURN_PLAYER:
 						wclear(stdscr);
-						mvprintw(0,0,"Player turn");
+						// mvprintw(0,0,"Player turn");
 						gsai = SELECT_NODE_PLAYER;
 						
 					break;
 					
 					case TURN_AI:
 						wclear(stdscr);
-						mvprintw(0,0,"Computer turn");
+						// mvprintw(0,0,"Computer turn");
 						gsai=SELECT_NODE_AI;
 						
 					break;
@@ -558,13 +481,13 @@ void GAME_LOOP_AI(gameGrid* gg)
 								if(is_player_node(gg,selected))
 								{
 									box(button_win(gg->node[selected]->node_but),0,0);
-									mvprintw(1,1,"node %d selected",selected);
+									// mvprintw(1,1,"node %d selected",selected);
 									units = gg->node[selected]->units/2;
-									mvprintw(1,1,"node %d selected %d",selected, units);
+									// mvprintw(1,1,"node %d selected %d",selected, units);
 									gsai = SEND_UNITS_PLAYER;
 								}
 								else{
-									mvprintw(0,0,"Not a player node");
+									// mvprintw(0,0,"Not a player node");
 									selected=-1;
 								} 
 							}
@@ -575,13 +498,15 @@ void GAME_LOOP_AI(gameGrid* gg)
 					
 					case SELECT_NODE_AI:
 						
-						while(!is_enemy_node(gg,(selected = rng(gg->nodes-1,0))));
+						while(!is_enemy_node(gg,(selected = rng(gg->nodes-1,0))) && !check_win_condition(gg));
+						units = gg->node[selected]->units/2;
 						gsai=WEIGH_OPTIONS_AI;
 					break;
 					
 					case WEIGH_OPTIONS_AI:
 						printw("AI thinking");
-						napms(2000);
+						// napms(2000);
+						dest = calc_attack_AI(gg,selected);
 						gsai=SEND_UNITS_AI;
 					break;
 					
@@ -612,15 +537,33 @@ void GAME_LOOP_AI(gameGrid* gg)
 								else gsai = TURN_PLAYER;
 								
 								}
+								else {
+									gsai=TURN_PLAYER;
+									wclear(button_win(gg->node[selected]->node_but));
+								}
 								selected = -1; dest = -1;
 							}
 						}
 						}
-						
+						// gsai=TURN_PLAYER;
 					break;
 					
 					case SEND_UNITS_AI:
-						sub_units(gg,0,10);
+					
+						// int extra_sub=0;
+						// int extra_add=0;
+						sub_units(gg,selected,units);
+						int extra_add, extra_sub;
+						if(is_neutral_node(gg,dest) || is_player_node(gg,dest))extra_sub = sub_units(gg,dest,units);
+						if(is_enemy_node(gg,dest)) extra_add = add_units(gg,dest,units);
+								
+						// gsai = END_TURN_PLAYER;
+						if(check_units(gg,dest)==2)
+							change_control(gg,dest,3,extra_sub);
+						if(check_units(gg,dest) ==1){
+							add_units(gg,selected,extra_add);
+							gg->node[dest]->units =100;
+							}
 						gsai=END_TURN_AI;
 					break;
 					
@@ -633,19 +576,37 @@ void GAME_LOOP_AI(gameGrid* gg)
 								check_units(gg,i);
 							}
 						}
-						
-					gsai = TURN_AI;
+						int win1= check_win_condition(gg);
+						if(win1 == 2)
+							gsai=AI_WIN;
+						else if(win1 == 1)
+							gsai=PLAYER_WIN;
+						else
+							gsai=TURN_AI;
 					break;
 					case END_TURN_AI:
-						gsai=TURN_PLAYER;
+						for(int i=0; i<gg->nodes;i++)
+						{
+							if(is_enemy_node(gg,i) ) {
+								add_units(gg,i,unit_gen);
+								check_units(gg,i);
+							}
+						}
+						int win2= check_win_condition(gg);
+						if(win2 == 2)
+							gsai=AI_WIN;
+						else if(win2 == 1)
+							gsai=PLAYER_WIN;
+						else
+							gsai=TURN_PLAYER;
 					break;
 					
 					case PLAYER_WIN:
-					
+						mvprintw(0,0,"PLAYER WIN!");
 					break;
 					
 					case AI_WIN:
-						
+						mvprintw(0,0,"AI WIN!");
 					break;
 				}
 			

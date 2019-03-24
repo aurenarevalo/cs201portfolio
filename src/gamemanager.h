@@ -108,6 +108,8 @@ int add_units(gameGrid* gg,int node, int units);
 
 
 int sub_units(gameGrid* gg,int node, int units);
+
+int check_win_condition(gameGrid* gg);
 float calc_base_weight(gameGrid *gg,int node);
 int calc_attack_AI(gameGrid* gg, int selected);
 

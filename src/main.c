@@ -82,7 +82,7 @@ int main(int argc, char**args){
 	// int ch;	
 	// USE NEW_GAME state to regenerate a board,  and reset everything. For now
 	//Starting on player turn.
-	// GAME_LOOP_AI(gg);
+	GAME_LOOP_AI(gg);
 	// intMatrix
 	// int V=gg->game_graph->vertices;
 	// 	intMatrix* adj_mat = construct_adj_matrix(gg->game_graph); 
@@ -165,6 +165,7 @@ int main(int argc, char**args){
 	endwin();
 	intMatrix* gm = construct_adj_matrix(gg->game_graph);
 	print_matrix(gm);
+	calc_attack_AI(gg,1);
 	// for(int i=0; i<V; i++)
 	// 	printf("%d\n",dist_arr[i]);
 	// DFS(adj_mat,2,visited,path,0);
