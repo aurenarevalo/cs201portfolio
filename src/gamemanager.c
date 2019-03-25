@@ -143,39 +143,40 @@ void add_adjacency(gameGrid** gg, int from, int to)
 	new_edge(&ggt->game_graph,from,to,dist);
 }
 
+int is_pos_available(gameGrid *gg, int x, int y);
 // void connect_nodes
 
 gameGrid* generate_gameGrid(PANEL* game_pan)
 {
 	int nrows, ncols, nodes;
-	nrows = 7;//rng(MAX_ROWS,MIN_ROWS);
-	ncols = 7;//rng(MAX_COLS,MIN_COLS);
-	nodes =4;// rng(MAX_NODES,MIN_NODES);
+	nrows = rng(MAX_ROWS,MIN_ROWS); //7
+	ncols = rng(MAX_COLS,MIN_COLS); //7
+	nodes = rng(MAX_NODES,MIN_NODES); //4
 	gameGrid* gg = init_gameGrid(nrows,ncols,nodes,game_pan);
-	ncols--;nrows--;
-	for(int r=0; r<=nrows; r++){
-		for(int c=0; c<=ncols; c++){
+	// ncols--;nrows--;
+	for(int r=0; r<nrows; r++){
+		for(int c=0; c<ncols; c++){
 			gg->parent->m[r][c] = 9;
 		}
 	}
-	/*set_node_params(&gg->node[0],2,50,rng(ncols,0),rng(nrows,0));
+	set_node_params(&gg->node[0],2,50,rng(ncols,0),rng(nrows,0));
 	place_node(&gg,gg->node[0]);
 	set_node_params(&gg->node[1],3,50,rng(ncols,1),rng(nrows,1));
-	place_node(&gg,gg->node[1]);*/
+	place_node(&gg,gg->node[1]);
 	// add_new_node(&gg,3,50,1,1);
 	// add_new_node(&gg,1,50,3,3);
 	// add_new_node(&gg,2,50,5,5);
 	// add_new_node(&gg,1,50,5,5);
-	set_node_params(gg->node[0],2,50,5,5);
+/*	set_node_params(gg->node[0],2,50,5,5);
 	place_node(&gg,gg->node[0]);
 	set_node_params(gg->node[1],3,50,1,1);
-	place_node(&gg,gg->node[1]);
-/*	for(int i=0; i<nodes; i++)
+	place_node(&gg,gg->node[1]);*/
+	for(int i=0; i<nodes; i++)
 	{
 		set_node_params(&gg->node[i],1,50,rng(ncols,0),rng(nrows,0));
 		place_node(&gg,gg->node[i]);
 		printf("%d\n",gg->node[i].pos.x);
-	}*/
+	}
 	set_node_params(gg->node[2],1,50,3,3);
 	set_node_params(gg->node[3],1,50,5,1);
 	place_node(&gg,gg->node[2]);
