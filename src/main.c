@@ -66,14 +66,45 @@ int main(int argc, char**args){
 
 	//GAMEPLAY
 
-	SCENE* game = init_scene(2,0);
-	add_panel_offset(game,"game grid",5,10);
 
-	gameGrid* gg = generate_gameGrid(game->pl->panel_array[0]);
+
+	/* need to rewrite so that generates new windows on different placements.
+	The player can switch between windows and take their turn*/
+
+
+	SCENE* game = init_scene(6,0,2);
+
+	
+	// add_panel_offset(game,"game grid",6,10);
+	add_panel(game,"main_game",17,70,2,5);
+	update_panels();
+	refresh();
+	doupdate();
+	add_panel(game,"nav_gamewins",4, 60,19, 11);
+	// add_panel_offset(game,"g",12,20);
+	
+	add_button(game,1,0,3,3,3);
+	
+	wbkgd(button_win(game->buttons[0]),COLOR_PAIR(6));
+	// gameGrid* gg = generate_gameGrid(game->pl->panel_array[0]);
+	
+	// int nrows = 100
+	
+	refresh();
+	update_panels();
+
 	box(scene_window(game,0),0,0);
+	box(scene_window(game,1),0,0);
 	// nodelay(scene_window(game,0),TRUE);
 	keypad(scene_window(game,0),TRUE);
+	// wbkgd(grid_window(gg),COLOR_PAIR(4));
 	keypad(stdscr,TRUE);
+	// prefresh(gg->game_pad,0,0,6,11,18,69);
+	// top_panel(game->pl->panel_array[2]);
+	
+	update_panels();
+	refresh();
+	doupdate();
 	// mousemask(ALL_MOUSE_EVENTS,NULL);
 	
 	// int selected_node = -1,dest_node = -1; 
@@ -82,7 +113,7 @@ int main(int argc, char**args){
 	// int ch;	
 	// USE NEW_GAME state to regenerate a board,  and reset everything. For now
 	//Starting on player turn.
-	GAME_LOOP_AI(gg);
+	// GAME_LOOP_AI(gg,game);
 	// intMatrix
 	// int V=gg->game_graph->vertices;
 	// 	intMatrix* adj_mat = construct_adj_matrix(gg->game_graph); 
@@ -159,13 +190,14 @@ int main(int argc, char**args){
 	refresh();
 	update_panels();
 	doupdate();
+	getch();
 	// menu_loop(mm,0);
 	// getch();
 	refresh();
 	endwin();
-	intMatrix* gm = construct_adj_matrix(gg->game_graph);
-	print_matrix(gm);
-	calc_attack_AI(gg,1);
+	// intMatrix* gm = construct_adj_matrix(gg->game_graph);
+	// print_matrix(gm);
+	// calc_attack_AI(gg,1);
 	// for(int i=0; i<V; i++)
 	// 	printf("%d\n",dist_arr[i]);
 	// DFS(adj_mat,2,visited,path,0);

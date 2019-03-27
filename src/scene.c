@@ -140,8 +140,9 @@ void add_panel(SCENE* scene,char *id,int y, int x, int starty, int startx){
 		idlen++;
 	scene->pl->id[scene->pl->n] = (char*)calloc(idlen,sizeof(char));
 	scene->pl->id[scene->pl->n] = id;
-	scene->pl->wl_ref = add_window(scene->pl->wl_ref,y,x,starty,startx);
-	scene->pl->panel_array[scene->pl->n] = new_panel(scene->pl->wl_ref->window_array[scene->pl->n]);
+	// scene->pl->wl_ref = add_window(scene->pl->wl_ref,y,x,starty,startx);
+	// scene->pl->panel_array[scene->pl->n] = new_panel(scene->pl->wl_ref->window_array[scene->pl->n]);
+	scene->pl->panel_array[scene->pl->n] = new_panel(newwin(y,x,starty,startx));
  	scene->pl->n++;
 }
  
@@ -156,6 +157,42 @@ void add_panel_offset(SCENE* scene, char*id, int offy, int offx)
 	scene->pl->panel_array[scene->pl->n] = new_panel(newwin_offset(offy,offx));
  	scene->pl->n++;
 }
+/*
+void add_pad_panel(SCENE* scene, char*id, int h, int w)
+{
+	check_size_panelList(scene->pl);
+	int idlen=0;
+	while(id[idlen] != '\0')
+		idlen++;
+ 	scene->pl->id[scene->pl->n] = (char*)calloc(idlen,sizeof(char));
+	scene->pl->id[scene->pl->n] = id;
+	scene->pl->panel_array[scene->pl->n] = new_panel(newpad(h,w));
+ 	scene->pl->n++;
+}*/
+void create_border(SCENE* scene,int lm, int tm, int rm, int bm)
+{
+	// int xmax,ymax;
+	// getmaxyx(stdscr()
+	// PANEL* lm, tm, rm, bm;
+	int startn=scene->pl->n;
+	//left, top, right, bot is the order of creation.
+	add_panel(scene,"left-margin",LINES,lm,0,0);
+	add_panel(scene,"top-margin",tm,COLS,0,0);
+	add_panel(scene,"right-margin",LINES,rm,0,COLS-rm);
+	add_panel(scene,"bot-margin",bm,COLS,LINES-bm,0);
+	
+	for(int i=0;i<4;i++)
+	{
+		wbkgd(scene_window(scene,i+startn),COLOR_PAIR(3));
+		top_panel(scene->pl->panel_array[i+startn]);
+	}
+	
+	refresh();
+	update_panels();
+	doupdate();
+	
+}
+
 
 /*
 * move function specifically for the defined structure.
@@ -207,7 +244,7 @@ WINDOW* panelList_window(panelList* pl, int indx)
 	int limy,limx;
 	getmaxyx(stdscr,limy,limx);
 	//if created window breaks terminal bounds, handle error
-	if((h+y)>=limy || (w+x)>=limx)
+	if((h+y)>limy || (w+x)>limx)
 	{
 		window_error_handler(1,wl->n,h,w,y,x);
 	}
@@ -385,19 +422,36 @@ void set_smenu_win(SCENE* scene, int mn, int pn)
 	assign_menu(scene->pl->panel_array[pn],&scene->ml->menu_array[mn]);
 }
 
+void check_size_buttons(SCENE* scene)
+{
+	if(scene->bnum+1 > scene->bsize){
+		scene->bsize +=1;
+		scene->buttons = realloc(scene->buttons,scene->bsize*sizeof(BUTTON*));
+	}
+}
+void add_button(SCENE* scene, int pn,int yrel, int xrel, int h, int w)
+{
+	check_size_buttons(scene);
+	scene->buttons[scene->bnum++] = new_button(scene_window(scene,pn),yrel,xrel,h,w);
+}
+
+
+
+/* ADD ERROR HANDLE*/
+
 WINDOW* scene_window(SCENE* scene, int pn)
 {
 	/* add BETTER error handle*/
 	if(pn > scene->pl->n || pn <0)
-		mvprintw(2,2,"Hey dumbass, panel %d doesn't exist ",pn);
+		mvprintw(2,2,"Hey , panel %d doesn't exist ",pn);
 	return panel_window(scene->pl->panel_array[pn]);
 }
 
 WINDOW* scene_menu_win(SCENE* scene, int mn)
 {
 	/* add BETTER error handle*/
-	if(mn > scene->ml->n || scene->has_menus == false || mn <0)
-		mvprintw(2,2,"Hey dumbass, menu %d doesn't exist ",mn);
+	if(mn > scene->ml->n || scene->has_menus == 0 || mn <0)
+		mvprintw(2,2,"Hey , menu %d doesn't exist ",mn);
 	return menu_win(scene->ml->menu_array[mn]);
 }
 /*void create_margin(WIN* win,int left, int right, int top, int bot)
@@ -409,59 +463,22 @@ void create_border(WIN* win, int width, int height,char bchar)
 {
 
 }*/
-SCENE* init_scene(size_t panels, size_t menus)
+SCENE* init_scene(size_t panels, size_t menus, size_t buttons)
 {
 	SCENE* scene = malloc(sizeof(SCENE));
 	scene->pl = init_panelList(panels);
 	if(menus >0){
 		printf("initializing menus");
-		scene->has_menus=true;
+		scene->has_menus=1;
 		scene->ml = init_menuList(menus);
 	}
 	else
 	{
-		scene->has_menus = false;
+		scene->has_menus = 1;
 		scene->ml = NULL;
 	}
+	scene->buttons = calloc(buttons,sizeof(BUTTON));
+	scene->bnum = 0;
+	scene->bsize = buttons;
 	return scene;
-}
-void resize_handler(SCENE* scene, int num,...)
-{
-	clear();
-	// unpost_menu(mm);
-	// format_menu();
-	refresh();
-}
-void mainMenuLoop()
-{
-	wchar_t ch; 	
-	while((ch=getch())!=122){
-		/*switch(ch)
-		{
-			case (int)KEY_DOWN:
-			case  (int)KEY_s:
-				menu_driver(mm,REQ_DOWN_ITEM);
-				break;
-			case (int)KEY_w :
-			case (int)KEY_UP :
-				menu_driver(mm,REQ_UP_ITEM);
-				break;
-			case (int)ENTER_KEY:
-				mvprintw(0,0, "Item selected is : %s", 
-						item_name(current_item(mm)));
-				pos_menu_cursor(mm);
-				break;
-			case (int)KEY_RESIZE:
-				resize_handler(1);
-				break;
-			default:
-				break;
-			}*/
-			/*post_menu(mm);
-			refresh();
-			wrefresh(mm_win);*/
-		mvprintw(0,0,"Hello");
-		refresh();
-
-		}
 }

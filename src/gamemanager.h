@@ -10,12 +10,15 @@
 #include "gamestates.h"
 
 #define MAX_UNITS 100
-#define MAX_ROWS 15
-#define MAX_COLS 15
-#define MAX_NODES 20
+#define MAX_ROWS 7
+#define MAX_COLS 7
+#define MAX_NODES 10
+
+#define SUB_BOARD_H 18
+#define SUB_BOARD_W 60
 
 #define MIN_UNITS 50
-#define MIN_ROWS 6
+#define MIN_ROWS 5
 #define MIN_COLS 6
 #define MIN_NODES 5
 
@@ -55,6 +58,7 @@ typedef struct ggrid{
 	int n_p1,n_p2,n_neutral; //actually implement this
 	intMatrix *parent;
 	PANEL* game_panel;
+	// WINDOW* game_pad;
 	infectionNode **node;
 	Graph* game_graph;
 }gameGrid;
@@ -80,6 +84,7 @@ float find_distance(infectionNode n1, infectionNode n2);
 *	players_not_adjacent
 *	draw_connections(gameGrid*,) -- calls add_new_node
 */
+WINDOW* grid_window(gameGrid* gg);
 
 void add_adjacency(gameGrid** gg, int from, int to);
 
@@ -113,7 +118,7 @@ int check_win_condition(gameGrid* gg);
 float calc_base_weight(gameGrid *gg,int node);
 int calc_attack_AI(gameGrid* gg, int selected);
 
-void GAME_LOOP_AI(gameGrid* gg);
+void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene);
 
 void GAME_LOOP_LOCAL(gameGrid* gg);
 

@@ -4,6 +4,66 @@
 		"selected_items":
 		[
 			[
+				"game",
+				"game_pan"
+			],
+			[
+				"check",
+				"check_win_condition"
+			],
+			[
+				"chec",
+				"check_win_condition"
+			],
+			[
+				"cond",
+				"check_win_condition"
+			],
+			[
+				"has",
+				"has_player"
+			],
+			[
+				"has_",
+				"has_enemy"
+			],
+			[
+				"extra_",
+				"extra_sub"
+			],
+			[
+				"TURN_",
+				"TURN_PLAYER"
+			],
+			[
+				"select",
+				"selected"
+			],
+			[
+				"calc",
+				"calc_attack_AI"
+			],
+			[
+				"cont",
+				"control"
+			],
+			[
+				"CTRL_W_",
+				"CTRL_W_SGT"
+			],
+			[
+				"CTRL",
+				"CTRL_W_SLT"
+			],
+			[
+				"contr",
+				"contr_weight"
+			],
+			[
+				"gameG",
+				"game_graph"
+			],
+			[
 				"adj",
 				"adjNode"
 			],
@@ -14,10 +74,6 @@
 			[
 				"SEND",
 				"SEND_UNITS_AI"
-			],
-			[
-				"check",
-				"check_units"
 			],
 			[
 				"che",
@@ -42,10 +98,6 @@
 			[
 				"print",
 				"printw"
-			],
-			[
-				"game",
-				"gameGrid"
 			],
 			[
 				"button_",
@@ -115,32 +167,34 @@
 			"file": "main.c",
 			"settings":
 			{
-				"buffer_size": 5135,
+				"buffer_size": 5539,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "#include \"gamemanager.h\"\n\nstatic unsigned int SD1 = 234234, SD2 = 21456789, SD3 = 0x7f0ce821;\n\ntypedef struct point Point;\n\ntypedef struct inode infectionNode;\n\ntypedef struct ggrid gameGrid;\n\ngameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan)\n{\n\t// printf(\"\\n\\n %d ROWS %d COLS %d NODES : %d possible NODES\\n\\n\\n\",r,c,nodes,r*c);\n\tgameGrid* gg = malloc(sizeof(gameGrid));\n\tgg->parent = init_intMatrix(r,c);\n\tgg->node = (infectionNode**)malloc(nodes*sizeof(infectionNode*));\n\tfor(int i=0; i<nodes; i++)\n\t\tgg->node[i] = init_infectionNode(0,-1);\n\tgg->nodes = nodes;\n\tgg->game_panel =game_pan;\n\tgg->game_graph = init_Graph(nodes);\n\treturn gg;\n\n}\n\ninfectionNode* init_infectionNode()\n{\n\tinfectionNode *node = malloc(sizeof(infectionNode));\n\tnode->control = -1;\n\tnode->units = -1;\n\tnode->pos.x = 0;\n\tnode->pos.y = 0;\n\tnode->node_but = malloc(sizeof(BUTTON));\n\tnode->al.head = NULL;\n\treturn node;\n}\n\nvoid place_node(gameGrid** grid,infectionNode* node)\n{\n\tgameGrid* ggrid = *grid;\n\tint x,y;\n\tx = node->pos.x;\n\ty = node->pos.y;\n\tggrid->parent->m[y][x] = node->control;\n\tnode->node_but = new_button(panel_window(ggrid->game_panel),y*2+1,x*3+1,2,3);\n\tif(node->control == 1){\n\t\twbkgd(button_win(node->node_but),COLOR_PAIR(7));\n\t}\n\telse if(node->control == 2)\n\t\twbkgd(button_win(node->node_but),COLOR_PAIR(5));\n\telse if(node->control == 3)\n\t\twbkgd(button_win(node->node_but),COLOR_PAIR(6));\n\tmvwprintw(button_win(node->node_but),0,0,\"%d\",node->units);\n}\n\nvoid set_node_params(infectionNode* node,int contr, int units, int x, int y)\n{\n\tnode->control = contr;\n\tnode->units = units;\n\tnode->pos.x = x;\n\tnode->pos.y = y;\n\n}\nvoid add_new_node(gameGrid** grid, int contr, int units, int x, int y)\n{\n\tgameGrid *ggrid = *grid;\n\tggrid->nodes++;\n\tggrid->node = realloc(ggrid->node,ggrid->nodes*sizeof(infectionNode));\n\tset_node_params(ggrid->node[ggrid->nodes-1],contr,units,x,y);\n\tplace_node(grid,ggrid->node[ggrid->nodes-1]);\n}\n /*\n * pseudo rng that seems to maintain a decent distribution. \n * probably can figure out, mathematically, one that will do better... but whatev\n * inspired by the KISS rng algorithm, but uses time() so the same board wont be generated at startup\n */\n\nint rng(unsigned int max,unsigned int min)\n {\t\n\tunsigned long long x;\n\tunsigned int t = time(NULL);\n\t// unsigned int m = 37;\n\t\tt ^= (t>>2); t ^= (t<<5); t^= (t<<10);\n\t\tSD1 ^= (SD1<<3); SD1^= (SD1>>8);\n\t\tSD2 ^= (SD2>>5); \n\t\tSD3 ^= (SD3>>8);\n\t\t x = (SD1*SD2 +SD3*SD1 + SD1*124567 + SD3)*t/3;\n\tint num = x%(max+1);\n\tif(num < min) return rng(max,min);\n\tprintf(\"%u\\n\",num);\t\n\treturn num;\n}\n/*\n* Finds the distance between two nodes. This is to help determine cost of movement.\n*/\nfloat find_distance(infectionNode n1, infectionNode n2)\n{\n\tfloat x1 = n1.pos.x, y1 = n1.pos.y;\n\tfloat x2 = n2.pos.x, y2 = n2.pos.y;\n\tfloat dx = x2-x1, dy = y2-y1;\n\tfloat dist = sqrt(pow(dx,2)+pow(dy,2));\n\tprintf(\"%f\\n\\n\", dist);\n\treturn dist;\n}\n\n/*\n* wow, what a function this will be\n* thinking about using a tree to store positions. easier to check \n*/\n\n/*void find_adjacencies(gameGrid *gg)\n{\n\tint r = gg->parent->r, c = gg->parent->c;\n\tint **m = gg->parent->m;\n\tfor(int i=0;i<gg->nodes;i++)\n\t{\n\t\tint y = gg->node[i]->pos.y;\n\t\tint x = gg->node[i]->pos.x;\n\t\tfor(int row=-1; row<2; row++)\n\t\t{\n\t\t\tfor(int col=-1; col<2; col++){\n\t\t\t\tint in_bounds = (((col+x) >= 0 && (col+x) <c)\n\t\t\t\t\t&& ((row+y) >=0 && (row+y) < r));\n\t\t\t\tif(in_bounds)\n\t\t\t\t{\n\t\t\t\t\tif(m[row+y][col+x] == 4)\n\t\t\t\t\t{\n\t\t\t\t\t\ty=row+y\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\t\n\t\t\n\t}\n}*/\n\nvoid add_adjacency(gameGrid** gg, int from, int to)\n{\n\tgameGrid* ggt = *gg;\n\tfloat dist = find_distance(*ggt->node[from],*ggt->node[to]);\n\tnew_edge(&ggt->game_graph,to,from,dist);\n\tnew_edge(&ggt->game_graph,from,to,dist);\n}\n\n// void connect_nodes\n\ngameGrid* generate_gameGrid(PANEL* game_pan)\n{\n\tint nrows, ncols, nodes;\n\tnrows = 7;//rng(MAX_ROWS,MIN_ROWS);\n\tncols = 7;//rng(MAX_COLS,MIN_COLS);\n\tnodes =4;// rng(MAX_NODES,MIN_NODES);\n\tgameGrid* gg = init_gameGrid(nrows,ncols,nodes,game_pan);\n\tncols--;nrows--;\n\tfor(int r=0; r<=nrows; r++){\n\t\tfor(int c=0; c<=ncols; c++){\n\t\t\tgg->parent->m[r][c] = 9;\n\t\t}\n\t}\n\t/*set_node_params(&gg->node[0],2,50,rng(ncols,0),rng(nrows,0));\n\tplace_node(&gg,gg->node[0]);\n\tset_node_params(&gg->node[1],3,50,rng(ncols,1),rng(nrows,1));\n\tplace_node(&gg,gg->node[1]);*/\n\t// add_new_node(&gg,3,50,1,1);\n\t// add_new_node(&gg,1,50,3,3);\n\t// add_new_node(&gg,2,50,5,5);\n\t// add_new_node(&gg,1,50,5,5);\n\tset_node_params(gg->node[0],2,50,5,5);\n\tplace_node(&gg,gg->node[0]);\n\tset_node_params(gg->node[1],3,50,1,1);\n\tplace_node(&gg,gg->node[1]);\n/*\tfor(int i=0; i<nodes; i++)\n\t{\n\t\tset_node_params(&gg->node[i],1,50,rng(ncols,0),rng(nrows,0));\n\t\tplace_node(&gg,gg->node[i]);\n\t\tprintf(\"%d\\n\",gg->node[i].pos.x);\n\t}*/\n\tset_node_params(gg->node[2],1,50,3,3);\n\tset_node_params(gg->node[3],2,50,5,1);\n\tplace_node(&gg,gg->node[2]);\n\tplace_node(&gg,gg->node[3]);\n\tadd_adjacency(&gg,0,3);\n\tadd_adjacency(&gg,0,2);\n\tadd_adjacency(&gg,2,1);\n\tadd_adjacency(&gg,1,3);\n\tadd_adjacency(&gg,2,3);\n\t// add_new_node(&gg,4,50,4,4);\n\t// add_new_node(&gg,4,50,2,2);\n\t// find_distance(gg->node[0],gg->node[1]);\n\n\n\treturn gg;\n}\n\n\nvoid refresh_nodes(gameGrid** gg)\n{\n\tgameGrid* ggt= *gg;\n\tfor(int i = 0; i< ggt->nodes; i++)\n\t{\t\n\t\tmvwprintw(button_win(ggt->node[i]->node_but),0,0,\"%d\",ggt->node[i]->units);\n\t\twrefresh(button_win(ggt->node[i]->node_but));\n\t}\n}\n//returns if node is a player node or not\nint is_player_node(gameGrid* gg, int node)\n{\n\treturn (gg->node[node]->control == 2);\n}\n//returns if node is a neutral node or not\nint is_neutral_node(gameGrid* gg, int node)\n{\n\treturn (gg->node[node]->control == 1);\n}\n\n// ALSO used for player2 identification!\nint is_enemy_node(gameGrid* gg, int node)\n{\n\treturn (gg->node[node]->control == 3);\n}\n\n//Check mouse button 1 click (down) is within bounds of a button. Returns the button node.\nint mk1_check(gameGrid* gg,MEVENT me)\n{\n\t\tfor(int i = 0; i< gg->nodes; i++)\n\t\t{\n\t\t\tprintw(\" - %d  %d \", i,gg->nodes);\n\t\t\tinfectionNode* node = gg->node[i];\n\t\t\tif(is_button_press(me,node->node_but))\n\t\t\t{\n\t\t\t\t// printw(\" - %d  %d \", i,gg->nodes);\n\t\t\t\t// mvwprintw(button_win(gg->node[i]->node_but),0,0,\"%d\",gg->node[i]->units);\n\t\t\t\treturn i;\n\t\t\t}\n\t\t}\n\treturn -1;\n}\n\n/*\n* Returns value depending on situtation\n* If units > 100, returns 1\n* if units < 0, returns 2\n* else, returns 0\n*/\nint check_units(gameGrid* gg, int node)\n{\n\tif(gg->node[node]->units >=MAX_UNITS)\n\t{\n\t\tgg->node[node]->units = MAX_UNITS;\n\t\treturn 1;\n\t}\n\tif(gg->node[node]->units <10) wclear(button_win(gg->node[node]->node_but));\n\tif (gg->node[node]->units < 0)\n\t\treturn 2;\n\treturn 0;\n}\n//changes control of node and sets color accordingly\nvoid change_control(gameGrid* gg, int node, int new_control, int overflow)\n{\n\tgg->node[node]->control = new_control;\n\tif(gg->node[node]->units < 0) gg->node[node]->units = overflow;\n\tswitch(new_control)\n\t{\n\t\tcase 2:\n\t\t\twbkgd(button_win(gg->node[node]->node_but),COLOR_PAIR(5));\n\t\tbreak;\n\t\tcase 3:\n\t\t\twbkgd(button_win(gg->node[node]->node_but),COLOR_PAIR(6));\n\t\tbreak;\n\t}\n\trefresh_nodes(&gg);\n}\n\n/*void set_units(gameGrid* gg, int node, int units)\n{\n\tgg->\n}*/\n\nint add_units(gameGrid* gg, int node, int units)\n{\n\tgg->node[node]->units += units;\n\tif(gg->node[node]->units > MAX_UNITS) return (gg->node[node]->units - MAX_UNITS);\n\treturn 0;\n\t\n\t// if()\n}\n\nint sub_units(gameGrid* gg,int node, int units)\n{\n\tgg->node[node]->units -= units;\n\tif(gg->node[node]->units< 0) return (-1*(gg->node[node]->units));\n\t\n\treturn 0;\n}\n\nvoid check_win_condition();\n\n/*enum get_game_state()\n{\n\n}*/\n\nint select_node(gameGrid *gg, MEVENT event,int control_select)\n{\n\t\n}\nvoid GAME_LOOP_AI(gameGrid* gg)\n{\n\tint input;\n\n\tGAME_STATES_AI gsai = TURN_PLAYER;\n\tmousemask(ALL_MOUSE_EVENTS,NULL);\n\tMEVENT event;\n\n/*\tNEW_GAME,\n\tSELECT_NODE_PLAYER,\n\tSELECT_NODE_AI,\n\tWEIGH_OPTIONS_AI,\n\tTURN_PLAYER,\n\tTURN_AI,\n\tSEND_UNITS_PLAYER,\n\tSEND_UNITS_AI,\n\tEND_TURN,\n\tPLAYER_WIN,\n\tAI_WIN*/\n\t\n\t/*\n\t*\tAI flow: The AI will select one of its nodes at random,\n\t*\tIt will then weigh it's options and proceed to attack\n\t*\n\t*/\n\t\n\t\n\t/*\n\t\tADD A CONFIRMATION FOR SENDING UNITS. TELL PLAYER HOW MANY TURNS IT WILL TAKE TO GET THERE.\n\t\tIF POSSIBLE ADD VISUAL SHOWING WHERE UNITS ARE.\n\t*/\n\tint units = 10;\n\tint unit_gen = 5;\n\t\n\tnodelay(panel_window(gg->game_panel),TRUE);\n\t\n\tint selected=-1, dest=-1;\n\twhile((input=wgetch(panel_window(gg->game_panel)))!=122)\n\t{\n\t\tswitch(input){\n\t\t\tdefault:\n\t\t\tcase KEY_MOUSE:\n\t\t\t\n\t\t\tif(1){\n\t\t\t\tswitch(gsai)\n\t\t\t\t{\n\t\t\t\t\tcase NEW_GAME_AI: //implement regeneration of board\n\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase TURN_PLAYER:\n\t\t\t\t\t\twclear(stdscr);\n\t\t\t\t\t\tmvprintw(0,0,\"Player turn\");\n\t\t\t\t\t\tgsai = SELECT_NODE_PLAYER;\n\t\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase TURN_AI:\n\t\t\t\t\t\twclear(stdscr);\n\t\t\t\t\t\tmvprintw(0,0,\"Computer turn\");\n\t\t\t\t\t\tgsai=SELECT_NODE_AI;\n\t\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase SELECT_NODE_PLAYER:\n\t\t\t\t\t\tif(getmouse(&event) == OK)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tselected = mk1_check(gg,event);\n\t\t\t\t\t\t\tif(!(selected<0))\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif(event.bstate & BUTTON1_PRESSED)\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\tprintw(\" oooooo\");\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\tif(is_player_node(gg,selected))\n\t\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\tbox(button_win(gg->node[selected]->node_but),0,0);\n\t\t\t\t\t\t\t\t\tmvprintw(1,1,\"node %d selected\",selected);\n\t\t\t\t\t\t\t\t\tunits = gg->node[selected]->units/2;\n\t\t\t\t\t\t\t\t\tmvprintw(1,1,\"node %d selected %d\",selected, units);\n\t\t\t\t\t\t\t\t\tgsai = SEND_UNITS_PLAYER;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\telse{\n\t\t\t\t\t\t\t\t\tmvprintw(0,0,\"Not a player node\");\n\t\t\t\t\t\t\t\t\tselected=-1;\n\t\t\t\t\t\t\t\t} \n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t// gsai = TURN_PLAYER;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase SELECT_NODE_AI:\n\t\t\t\t\t\t// printw(\"AI thinking\")\n\t\t\t\t\t\t// napms(2000);\n\t\t\t\t\t\tgsai=WEIGH_OPTIONS_AI;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase WEIGH_OPTIONS_AI:\n\t\t\t\t\t\tprintw(\"AI thinking\");\n\t\t\t\t\t\tnapms(2000);\n\t\t\t\t\t\tgsai=SEND_UNITS_AI;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\tcase SEND_UNITS_PLAYER:\n\t\t\t\t\t\tif(getmouse(&event) == OK)\n\t\t\t\t\t\t{\n\t\t\t\t\t\tif(event.bstate & BUTTON1_PRESSED)\n\t\t\t\t\t\t{\t\n\t\t\t\t\t\t\tif((dest=mk1_check(gg,event))+1){\n\t\t\t\t\t\t\t\tif(check_units(gg,dest)!=1)\n\t\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\twclear(button_win(gg->node[selected]->node_but));\n\t\t\t\t\t\t\t\tif(dest != selected){\n\t\t\t\t\t\t\t\t\tint extra_sub=0;\n\t\t\t\t\t\t\t\t\tint extra_add=0;\n\t\t\t\t\t\t\t\t\tsub_units(gg,selected,units);\n\t\t\t\t\t\t\t\t\tif(is_neutral_node(gg,dest) || is_enemy_node(gg,dest))extra_sub = sub_units(gg,dest,units);\n\t\t\t\t\t\t\t\t\tif(is_player_node(gg,dest)) extra_add = add_units(gg,dest,units);\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tgsai = END_TURN_PLAYER;\n\t\t\t\t\t\t\t\t\tif(check_units(gg,dest)==2)\n\t\t\t\t\t\t\t\t\t\tchange_control(gg,dest,2,extra_sub);\n\t\t\t\t\t\t\t\t\tif(check_units(gg,dest) ==1){\n\t\t\t\t\t\t\t\t\t\tadd_units(gg,selected,extra_add);\n\t\t\t\t\t\t\t\t\t\tgg->node[dest]->units =100;\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\telse gsai = TURN_PLAYER;\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\tselected = -1; dest = -1;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase SEND_UNITS_AI:\n\t\t\t\t\t\tsub_units(gg,0,10);\n\t\t\t\t\t\tgsai=END_TURN_AI;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase END_TURN_PLAYER:\n\t\t\t\t\t\n\t\t\t\t\tfor(int i=0; i<gg->nodes;i++)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tif(is_player_node(gg,i) ) {\n\t\t\t\t\t\t\t\tadd_units(gg,i,unit_gen);\n\t\t\t\t\t\t\t\tcheck_units(gg,i);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t\n\t\t\t\t\tgsai = TURN_AI;\n\t\t\t\t\tbreak;\n\t\t\t\t\tcase END_TURN_AI:\n\t\t\t\t\t\tgsai=TURN_PLAYER;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase PLAYER_WIN:\n\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase AI_WIN:\n\t\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t\n\t\t\t}\n\t\t\n\t\t\n\t\t\tbreak;\n\t\t\t\n\t\t\t// default:\n\t\t\n\t\t\t// break;\n\t\t\n\t\t}\n\t\trefresh_nodes(&gg);\n\t\tupdate_panels();\n\t\tdoupdate();\n\t\t// mvprintw(0,0,\"           STATE: %d\", gsai);\n\t}\n}\n\n\nvoid GAME_LOOP_LOCAL(gameGrid* gg)\n{\n\tint input;\n\n\n\t// GAME_STATES_LOCAL gsl;\n\n\twhile((input=wgetch(panel_window(gg->game_panel)))!=122)\n\t{\n\t\tswitch(input){\t\n\t\tcase KEY_MOUSE:\n\t\t/*\tswitch(gsl)\n\t\t\t{\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t\t}*/\n\t\t\n\t\t\n\t\t\n\t\tbreak;\n\t\t\n\t\t}\n\t\trefresh_nodes(&gg);\n\t\tupdate_panels();\n\t\tdoupdate();\n\n\t}\n\n\n}",
-			"file": "gamemanager.c",
-			"file_size": 11671,
-			"file_write_time": 131975741471287105,
-			"settings":
-			{
-				"buffer_size": 11670,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "#include <stdlib.h>\n#include <time.h>\n#include <math.h>\n#include <panel.h>\n\n\n#include \"infection_ds.h\"\n#include \"utility.h\"\n#include \"button.h\"\n#include \"gamestates.h\"\n\n#define MAX_UNITS 100\n#define MAX_ROWS 15\n#define MAX_COLS 15\n#define MAX_NODES 20\n\n#define MIN_UNITS 50\n#define MIN_ROWS 6\n#define MIN_COLS 6\n#define MIN_NODES 5\n\n/*\n\n\t\tINFECTION GAME GUIDELINES: \n\t\t1. No two player nodes should be directly adjacent! At least 1 neutral node in b/t\n\t\t2. Maximum connections is 8! one for each adjacent position on the grid! ( for simplicity)\n\t\t3. Each player starts at 50 units! Max is 100 units!\n\t\t4. Weight of sending costs should be calculated (ignoring loss of origin units -- add later?)\n\t\t\tbased on the DISTANCE to each node, and the UNITS within each node!\n\n\n\n\n\n\n\n\n*/\n\ntypedef struct point{\n\tint x,y;\n}Point;\n// 9 for neutral, 1 for connector vert/horiz, 2 for player 1, 3 for player 2/AI, 4 connector horiz.-- int control\ntypedef struct inode{\n\tint control;\n\tint units;\n\tPoint pos;\n\tBUTTON* node_but;\n\t// adjNode* anode;\n\tadjList al;\n}infectionNode;\n\ntypedef struct ggrid{\n\tint nodes;\n\tint n_p1,n_p2,n_neutral;\n\tintMatrix *parent;\n\tPANEL* game_panel;\n\tinfectionNode **node// printw(\"AI thinking\")\n\t\t\t\t\t\t// napms(2000);;\n\tGraph* game_graph;\n}gameGrid;\n\ngameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan);\n\ninfectionNode* init_infectionNode();\n\nvoid place_node(gameGrid** grid,infectionNode *node);\n\nvoid set_node_params(infectionNode* node,int contr, int units, int x, int y);\n\nvoid add_new_node(gameGrid** gg, int contr, int units, int x, int y);\n\nint rng(unsigned int max,unsigned int min);\n\nfloat find_distance(infectionNode n1, infectionNode n2);\n\n/* function that will need to be implemented, named for ideas */\n\n/*\t\n*\trandomize_adjacency(gameGrid*,...?);\n*\tplayers_not_adjacent\n*\tdraw_connections(gameGrid*,) -- calls add_new_node\n*/\n\nvoid add_adjacency(gameGrid** gg, int from, int to);\n\ngameGrid* generate_gameGrid(PANEL* game_pan);\n\nvoid refresh_nodes(gameGrid** gg);\n\nint is_player_node(gameGrid* gg, int node);\n\n//returns if node is a neutral node or not\nint is_neutral_node(gameGrid* gg, int node);\n\n\n// ALSO used for player2 identification!\nint is_enemy_node(gameGrid* gg, int node);\n\nint mk1_check(gameGrid* gg,MEVENT me);\n\nint check_units(gameGrid* gg, int node);\n\nvoid change_control(gameGrid* gg, int node, int new_control, int overflow);\n\n// void set_units(gameGrid* gg, int node, int units);\n\nint add_units(gameGrid* gg,int node, int units);\n\n\nint sub_units(gameGrid* gg,int node, int units);\n\n\nvoid GAME_LOOP_AI(gameGrid* gg);\n\nvoid GAME_LOOP_LOCAL(gameGrid* gg);\n\n",
 			"file": "gamemanager.h",
-			"file_size": 2563,
-			"file_write_time": 131975742417525074,
 			"settings":
 			{
-				"buffer_size": 2609,
+				"buffer_size": 2723,
 				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "gamemanager.c",
+			"settings":
+			{
+				"buffer_size": 15527,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "r\n\tfor(int r=0; r<nrows; r++){\n\t\tfor(int c=0; c<ncols; c++){\n\t\t\tgg->parent->m[r][c] = 9;\n\t\t}\n\t}\n\tset_node_params(&gg->node[0],2,50,rng(ncols,0),rng(nrows,0));\n\tplace_node(&gg,gg->node[0]);\n\tset_node_params(&gg->node[1],3,50,rng(ncols,1),rng(nrows,1));\n\tplace_node(&gg,gg->node[1]);\n\t// add_new_node(&gg,3,50,1,1);\n\t// add_new_node(&gg,1,50,3,3);\n\t// add_new_node(&gg,2,50,5,5);\n\t// add_new_node(&gg,1,50,5,5);\n/*\tset_node_params(gg->node[0],2,50,5,5);\n\tplace_node(&gg,gg->node[0]);\n\tset_node_params(gg->node[1],3,50,1,1);\n\tplace_node(&gg,gg->node[1]);*/\n\tfor(int i=0; i<nodes; i++)\n\t{\n\t\tset_node_params(&gg->node[i],1,50,rng(ncols,0),rng(nrows,0));\n\t\tplace_node(&gg,gg->node[i]);\n\t\tprintf(\"%d\\n\",gg->node[i].pos.x);\n\t}\n\tset_node_params(gg->node[2],1,50,3,3);\n\tset_node_params(gg->node[3],1,50,5,1);\n\tplace_node(&gg,gg->node[2]);\n\tplace_node(&gg,gg->node[3]);\n\tadd_adjacency(&gg,0,3);\n\tadd_adjacency(&gg,0,2);\n\tadd_adjacency(&gg,2,1);\n\tadd_adjacency(&gg,1,3);\n\tadd_adjacency(&gg,1,2);\n\tadd_adjacency(&gg,2,3);\n\t// add_new_node(&gg,4,50,4,4);\n\t// add_new_node(&gg,4,50,2,2);\n\t// find_distance(gg->node[0],gg->node[1]);\n\n\n\treturn gg;\n}\n\n\nvoid refresh_nodes(gameGrid** gg)\n{\n\tgameGrid* ggt= *gg;\n\tfor(int i = 0; i< ggt->nodes; i++)\n\t{\t\n\t\tmvwprintw(button_win(ggt->node[i]->node_but),0,0,\"%d\",ggt->node[i]->units);\n\t\twrefresh(button_win(ggt->node[i]->node_but));\n\t}\n}\n//returns if node is a player node or not\nint is_player_node(gameGrid* gg, int node)\n{\n\treturn (gg->node[node]->control == 2);\n}\n//returns if node is a neutral node or not\nint is_neutral_node(gameGrid* gg, int node)\n{\n\treturn (gg->node[node]->control == 1);\n}\n\n// ALSO used for player2 identification!\nint is_enemy_node(gameGrid* gg, int node)\n{\n\treturn (gg->node[node]->control == 3);\n}\n\n//Check mouse button 1 click (down) is within bounds of a button. Returns the button node.\nint mk1_check(gameGrid* gg,MEVENT me)\n{\n\t\tfor(int i = 0; i< gg->nodes; i++)\n\t\t{\n\t\t\t// printw(\" - %d  %d \", i,gg->nodes);\n\t\t\tinfectionNode* node = gg->node[i];\n\t\t\tif(is_button_press(me,node->node_but))\n\t\t\t{\n\t\t\t\t// printw(\" - %d  %d \", i,gg->nodes);\n\t\t\t\t// mvwprintw(button_win(gg->node[i]->node_but),0,0,\"%d\",gg->node[i]->units);\n\t\t\t\treturn i;\n\t\t\t}\n\t\t}\n\treturn -1;\n}\n\n/*\n* Returns value depending on situtation\n* If units > 100, returns 1\n* if units < 0, returns 2\n* else, returns 0\n*/\nint check_units(gameGrid* gg, int node)\n{\n\tif(gg->node[node]->units >=MAX_UNITS)\n\t{\n\t\tgg->node[node]->units = MAX_UNITS;\n\t\treturn 1;\n\t}\n\tif(gg->node[node]->units <10) wclear(button_win(gg->node[node]->node_but));\n\tif (gg->node[node]->units <= 0)\n\t\treturn 2;\n\treturn 0;\n}\n//changes control of node and sets color accordingly\nvoid change_control(gameGrid* gg, int node, int new_control, int overflow)\n{\n\tgg->node[node]->control = new_control;\n\tif(gg->node[node]->units < 0) gg->node[node]->units = overflow;\n\tswitch(new_control)\n\t{\n\t\tcase 2:\n\t\t\twbkgd(button_win(gg->node[node]->node_but),COLOR_PAIR(5));\n\t\tbreak;\n\t\tcase 3:\n\t\t\twbkgd(button_win(gg->node[node]->node_but),COLOR_PAIR(6));\n\t\tbreak;\n\t}\n\trefresh_nodes(&gg);\n}\n\n/*void set_units(gameGrid* gg, int node, int units)\n{\n\tgg->\n}*/\n\nint add_units(gameGrid* gg, int node, int units)\n{\n\tgg->node[node]->units += units;\n\tif(gg->node[node]->units > MAX_UNITS) return (gg->node[node]->units - MAX_UNITS);\n\treturn 0;\n}\n\nint sub_units(gameGrid* gg,int node, int units)\n{\n\tgg->node[node]->units -= units;\n\tif(gg->node[node]->units< 0) return (-1*(gg->node[node]->units));\n\t\n\treturn 0;\n}\n\n// if return 1, player win, if 2 enemy win, return 0 else.\nint check_win_condition(gameGrid* gg)\n{\t\n\tint size = gg->game_graph->vertices;\n\tint has_enemy=0, has_player=0;\n\tfor(int i=0; i<size; i++)\n\t{\t\n\t\t// wprintw(panel_window(gg->game_panel),\"---%d--- \",gg->node[i]->control);\n\t\tif(gg->node[i]->control == 2) has_player=1;\n\t\tif(gg->node[i]->control==3) has_enemy=1;\n\t}\n\t// wprintw(panel_window(gg->game_panel),\"-.- %d, %d -.-\",has_player,has_enemy);\n\tif(has_player && !has_enemy) return 1;\n\tif(has_enemy && !has_player) return 2;\n\t\n\treturn 0;\n}\n\n/*enum get_game_state()\n{\n\n}*/\n\nint select_node(gameGrid *gg, MEVENT event,int control_select)\n{\n\t\n}\n#define CTRL_W_P 2\n#define CTRL_W_N 1\n#define CTRL_W_SLT 4\n#define CTRL_W_SGT 10\n\n#define SU_W_GT_MAX 0.5;\n#define SU_W_GT_MID 0.75;\n#define SU_W_BASE 1;\n#define SU_W_LOW 1.5;\n\n#define DIST_W_MULT 3;\n/*  WEIGHT TABLE, subject to change\n*\tis_neutral -> 1 (priority)\n*\tis_player -> 2\n*\tis_self(AI) and < 50 units -> 4\n*\tis_self(AI) and >= 50 units -> 10\n*\t\n*\t\tSelf units ...\n*\tunits > 75 -> 0.5;\n*\tunits > 50 -> 0.75;\n*\tunits < 25 -> 1.5;\n*\n*\t\tOther units ...\n*\t units -> units\n*\n*\t\tDistance  ...\n*\tturns = Distance/sqrt(8);\n*\t\t-> turns*3\n*/\n\n// used https://www.thecrazyprogrammer.com/2014/03/dijkstra-algorithm-for-finding-shortest-path-of-a-graph.html\n// as reference\nint Djikstra(gameGrid *gg,int n,int start)\n{\n\t\n\t\n}\n\n\nfloat calc_wieghts_from_node(gameGrid *gg,int node)\n{\n\t\n}\n\nint calc_attack_AI(gameGrid* gg, int selected)\n{\n\tint V = gg->game_graph->vertices;\n\tfloat weight[V];\n\tfloat self_unit_weight;\n\tfor(int i=0; i<V; i++)\n\t\tweight[i] = 0;\n\tadjNode *curr = gg->game_graph->arr[selected].head;\n\tint n=-1;\n\twhile(curr != NULL)\n\t{\n\t\tn=curr->adj;\n\t\tint contr = gg->node[n]->control;\n\t\tint units = gg->node[n]->units;\n\t\tif(contr==1) weight[n] += CTRL_W_N;\n\t\telse if(contr==2) weight[n] += CTRL_W_P;\n\t\telse if(contr==3 && units < 50) weight[n] += CTRL_W_SLT;\n\t\telse if(contr==3 && units >= 50) weight[n] += CTRL_W_SGT;\n\t\tweight[n] += gg->node[n]->units/3;\n\t\tcurr = curr->next;\n\t}\n\tint units = gg->node[selected]->units;\n\tif(units > 75) self_unit_weight = 0.5;\n\telse if (units > 50) self_unit_weight = 0.75;\n\telse if (units <= 25) self_unit_weight = 1.5;\n\telse self_unit_weight = 1;\n\tint min=weight[0];\n\tfor(int i=1; i<V; i++){ \n\t\tif(min == 0 || weight[i] < min) min =weight[i];\n\t\tweight[i] *= self_unit_weight;\n\t\tprintf(\"%f\\n\",weight[i]);\n\t}\n\tint minindx = binary_search(weight,V,min);\n\t// printf(\"\\n%d\",minindx);\n\n\treturn minindx;\n\t\n}\nvoid GAME_LOOP_AI(gameGrid* gg)\n{\n\tint input;\n\n\tGAME_STATES_AI gsai = TURN_PLAYER;\n\tmousemask(ALL_MOUSE_EVENTS,NULL);\n\tMEVENT event;\n\n/*\tNEW_GAME,\n\tSELECT_NODE_PLAYER,\n\tSELECT_NODE_AI,\n\tWEIGH_OPTIONS_AI,\n\tTURN_PLAYER,\n\tTURN_AI,\n\tSEND_UNITS_PLAYER,\n\tSEND_UNITS_AI,\n\tEND_TURN,\n\tPLAYER_WIN,\n\tAI_WIN*/\n\t\n\t/*\n\t*\tAI flow: The AI will select one of its nodes at random,\n\t*\tIt will then weigh it's options and proceed to attack\n\t*\n\t*/\n\t\n\t\n\t/*\n\t\tADD A CONFIRMATION FOR SENDING UNITS. TELL PLAYER HOW MANY TURNS IT WILL TAKE TO GET THERE.\n\t\tIF POSSIBLE ADD VISUAL SHOWING WHERE UNITS ARE.\n\t*/\n\tint units = 10;\n\tint unit_gen = 5;\n\t\n\tnodelay(panel_window(gg->game_panel),TRUE);\n\t\n\tint selected=-1, dest=-1;\n\twhile((input=wgetch(panel_window(gg->game_panel)))!=122)\n\t{\n\t\tswitch(input){\n\t\t\tdefault:\n\t\t\tcase KEY_MOUSE:\n\t\t\t\n\t\t\tif(1){\n\t\t\t\tswitch(gsai)\n\t\t\t\t{\n\t\t\t\t\tcase NEW_GAME_AI: //implement regeneration of board\n\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase TURN_PLAYER:\n\t\t\t\t\t\twclear(stdscr);\n\t\t\t\t\t\t//something useless\n\t\t\t\t\t\t// mvprintw(0,0,\"Player turn\");\n\t\t\t\t\t\tgsai = SELECT_NODE_PLAYER;\n\t\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase TURN_AI:\n\t\t\t\t\t\twclear(stdscr);\n\t\t\t\t\t\t// mvprintw(0,0,\"Computer turn\");\n\t\t\t\t\t\tgsai=SELECT_NODE_AI;\n\t\t\t\t\t\t\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase SELECT_NODE_PLAYER:\n\t\t\t\t\t\tif(getmouse(&event) == OK)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tselected = mk1_check(gg,event);\n\t\t\t\t\t\t\tif(!(selected<0))\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif(event.bstate & BUTTON1_PRESSED)\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t// printw(\" oooooo\");\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\tif(is_player_node(gg,selected))\n\t\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\tbox(button_win(gg->node[selected]->node_but),0,0);\n\t\t\t\t\t\t\t\t\t// mvprintw(1,1,\"node %d selected\",selected);\n\t\t\t\t\t\t\t\t\tunits = gg->node[selected]->units/2;\n\t\t\t\t\t\t\t\t\t// mvprintw(1,1,\"node %d selected %d\",selected, units);\n\t\t\t\t\t\t\t\t\tgsai = SEND_UNITS_PLAYER;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\telse{\n\t\t\t\t\t\t\t\t\t// mvprintw(0,0,\"Not a player node\");\n\t\t\t\t\t\t\t\t\tselected=-1;\n\t\t\t\t\t\t\t\t} \n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t// gsai = TURN_PLAYER;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase SELECT_NODE_AI:\n\t\t\t\t\t\t\n\t\t\t\t\t\twhile(!is_enemy_node(gg,(selected = rng(gg->nodes-1,0))) && !check_win_condition(gg));\n\t\t\t\t\t\tunits = gg->node[selected]->units/2;\n\t\t\t\t\t\tgsai=WEIGH_OPTIONS_AI;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase WEIGH_OPTIONS_AI:\n\t\t\t\t\t\tprintw(\"AI thinking\");\n\t\t\t\t\t\t// napms(2000);\n\t\t\t\t\t\tdest = calc_attack_AI(gg,selected);\n\t\t\t\t\t\tgsai=SEND_UNITS_AI;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase SEND_UNITS_PLAYER:\n\t\t\t\t\t\tif(getmouse(&event) == OK)\n\t\t\t\t\t\t{\n\t\t\t\t\t\tif(event.bstate & BUTTON1_PRESSED)\n\t\t\t\t\t\t{\t\n\t\t\t\t\t\t\tif((dest=mk1_check(gg,event))+1){\n\t\t\t\t\t\t\t\tif(check_units(gg,dest)!=1)\n\t\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\twclear(button_win(gg->node[selected]->node_but));\n\t\t\t\t\t\t\t\tif(dest != selected){\n\t\t\t\t\t\t\t\t\tint extra_sub=0;\n\t\t\t\t\t\t\t\t\tint extra_add=0;\n\t\t\t\t\t\t\t\t\tsub_units(gg,selected,units);\n\t\t\t\t\t\t\t\t\tif(is_neutral_node(gg,dest) || is_enemy_node(gg,dest))extra_sub = sub_units(gg,dest,units);\n\t\t\t\t\t\t\t\t\tif(is_player_node(gg,dest)) extra_add = add_units(gg,dest,units);\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tgsai = END_TURN_PLAYER;\n\t\t\t\t\t\t\t\t\tif(check_units(gg,dest)==2)\n\t\t\t\t\t\t\t\t\t\tchange_control(gg,dest,2,extra_sub);\n\t\t\t\t\t\t\t\t\tif(check_units(gg,dest) ==1){\n\t\t\t\t\t\t\t\t\t\tadd_units(gg,selected,extra_add);\n\t\t\t\t\t\t\t\t\t\tgg->node[dest]->units =100;\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\telse gsai = TURN_PLAYER;\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\telse {\n\t\t\t\t\t\t\t\t\tgsai=TURN_PLAYER;\n\t\t\t\t\t\t\t\t\twclear(button_win(gg->node[selected]->node_but));\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\tselected = -1; dest = -1;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t// gsai=TURN_PLAYER;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase SEND_UNITS_AI:\n\t\t\t\t\t\n\t\t\t\t\t\t// int extra_sub=0;\n\t\t\t\t\t\t// int extra_add=0;\n\t\t\t\t\t\tsub_units(gg,selected,units);\n\t\t\t\t\t\tint extra_add, extra_sub;\n\t\t\t\t\t\tif(is_neutral_node(gg,dest) || is_player_node(gg,dest))extra_sub = sub_units(gg,dest,units);\n\t\t\t\t\t\tif(is_enemy_node(gg,dest)) extra_add = add_units(gg,dest,units);\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t// gsai = END_TURN_PLAYER;\n\t\t\t\t\t\tif(check_units(gg,dest)==2)\n\t\t\t\t\t\t\tchange_control(gg,dest,3,extra_sub);\n\t\t\t\t\t\tif(check_units(gg,dest) ==1){\n\t\t\t\t\t\t\tadd_units(gg,selected,extra_add);\n\t\t\t\t\t\t\tgg->node[dest]->units =100;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\tgsai=END_TURN_AI;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase END_TURN_PLAYER:\n\t\t\t\t\t\n\t\t\t\t\tfor(int i=0; i<gg->nodes;i++)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tif(is_player_node(gg,i) ) {\n\t\t\t\t\t\t\t\tadd_units(gg,i,unit_gen);\n\t\t\t\t\t\t\t\tcheck_units(gg,i);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tint win1= check_win_condition(gg);\n\t\t\t\t\t\tif(win1 == 2)\n\t\t\t\t\t\t\tgsai=AI_WIN;\n\t\t\t\t\t\telse if(win1 == 1)\n\t\t\t\t\t\t\tgsai=PLAYER_WIN;\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\tgsai=TURN_AI;\n\t\t\t\t\tbreak;\n\t\t\t\t\tcase END_TURN_AI:\n\t\t\t\t\t\tfor(int i=0; i<gg->nodes;i++)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tif(is_enemy_node(gg,i) ) {\n\t\t\t\t\t\t\t\tadd_units(gg,i,unit_gen);\n\t\t\t\t\t\t\t\tcheck_units(gg,i);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tint win2= check_win_condition(gg);\n\t\t\t\t\t\tif(win2 == 2)\n\t\t\t\t\t\t\tgsai=AI_WIN;\n\t\t\t\t\t\telse if(win2 == 1)\n\t\t\t\t\t\t\tgsai=PLAYER_WIN;\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\tgsai=TURN_PLAYER;\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase PLAYER_WIN:\n\t\t\t\t\t\tmvprintw(0,0,\"PLAYER WIN!\");\n\t\t\t\t\tbreak;\n\t\t\t\t\t\n\t\t\t\t\tcase AI_WIN:\n\t\t\t\t\t\tmvprintw(0,0,\"AI WIN!\");\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t\n\t\t\t}\n\t\t\n\t\t\n\t\t\tbreak;\n\t\t\t\n\t\t\t// default:\n\t\t\n\t\t\t// break;\n\t\t\n\t\t}\n\t\trefresh_nodes(&gg);\n\t\tupdate_panels();\n\t\tdoupdate();\n\t\t// mvprintw(0,0,\"           STATE: %d\", gsai);\n\t}\n}\n\n\nvoid GAME_LOOP_LOCAL(gameGrid* gg)\n{\n\tint input;\n\n\n\t// GAME_STATES_LOCAL gsl;\n\n\twhile((input=wgetch(panel_window(gg->game_panel)))!=122)\n\t{\n\t\tswitch(input){\t\n\t\tcase KEY_MOUSE:\n\t\t/*\tswitch(gsl)\n\t\t\t{\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t\t}*/\n\t\t\n\t\t\n\t\t\n\t\tbreak;\n\t\t\n\t\t}\n\t\trefresh_nodes(&gg);\n\t\tupdate_panels();\n\t\tdoupdate();\n\n\t}\n\n\n}",
+			"settings":
+			{
+				"buffer_size": 11344,
 				"line_ending": "Unix"
 			}
 		},
@@ -148,7 +202,7 @@
 			"file": "infection_ds.c",
 			"settings":
 			{
-				"buffer_size": 2148,
+				"buffer_size": 2179,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -157,8 +211,24 @@
 			"file": "infection_ds.h",
 			"settings":
 			{
-				"buffer_size": 689,
+				"buffer_size": 697,
 				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utility.c",
+			"settings":
+			{
+				"buffer_size": 1754,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "utility.h",
+			"settings":
+			{
+				"buffer_size": 276,
 				"line_ending": "Unix"
 			}
 		},
@@ -224,11 +294,11 @@
 	[
 		"/home/auren/projects/cs201portfolio",
 		"/home/auren/projects/cs201portfolio/src",
-		"/home/auren/projects/cs201portfolio/test",
 		"/home/auren/projects/cs201portfolio/userlib"
 	],
 	"file_history":
 	[
+		"/home/auren/projects/cs201portfolio/src/gamemanager.c",
 		"/home/auren/projects/cs201portfolio/src/button.h",
 		"/home/auren/projects/cs201portfolio/src/splash.txt",
 		"/home/auren/projects/cs201portfolio/src/scene.h",
@@ -243,7 +313,6 @@
 		"/home/auren/projects/cs201portfolio/src/portfolio.sublime-project",
 		"/home/auren/projects/cs201portfolio/src/menumanager.h",
 		"/home/auren/projects/cs201portfolio/src/test.txt",
-		"/home/auren/projects/cs201portfolio/src/gamemanager.c",
 		"/home/auren/projects/cs201portfolio/src/main.c",
 		"/home/auren/projects/cs201portfolio/src/winman.c",
 		"/home/auren/projects/cs201portfolio/src/menumanager.c",
@@ -276,7 +345,7 @@
 	],
 	"find":
 	{
-		"height": 57.0
+		"height": 41.0
 	},
 	"find_in_files":
 	{
@@ -291,6 +360,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"game_grid",
+			"return NULL;",
 			"gdb_run",
 			"gdb_",
 			"clear",
@@ -352,15 +423,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5135,
+						"buffer_size": 5539,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3373,
-								3373
+								1925,
+								1925
 							]
 						],
 						"settings":
@@ -369,7 +440,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 3125.0,
+						"translation.y": 2970.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 3,
@@ -377,48 +448,19 @@
 				},
 				{
 					"buffer": 1,
-					"file": "gamemanager.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 11670,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9562,
-								9516
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 7495.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
 					"file": "gamemanager.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2609,
+						"buffer_size": 2723,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1250,
-								1250
+								2446,
+								2446
 							]
 						],
 						"settings":
@@ -427,27 +469,27 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 743.0,
+						"translation.y": 664.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "infection_ds.c",
+					"buffer": 2,
+					"file": "gamemanager.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2148,
+						"buffer_size": 15527,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								114,
-								114
+								6643,
+								6643
 							]
 						],
 						"settings":
@@ -456,7 +498,35 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 4830.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11344,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10662,
+								10662
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 8421.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -464,19 +534,48 @@
 				},
 				{
 					"buffer": 4,
-					"file": "infection_ds.h",
+					"file": "infection_ds.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 689,
+						"buffer_size": 2179,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								451,
-								451
+								1801,
+								1801
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 557.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "infection_ds.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 697,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								599,
+								599
 							]
 						],
 						"settings":
@@ -484,14 +583,71 @@
 							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 335.0,
+						"translation.y": 48.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "utility.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1754,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1125,
+								1125
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 660.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 7,
+					"file": "utility.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 276,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								208,
+								208
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
 					"file": "gamestates.h",
 					"semi_transient": false,
 					"settings":
@@ -503,8 +659,8 @@
 						"selection":
 						[
 							[
-								392,
-								392
+								20,
+								20
 							]
 						],
 						"settings":
@@ -516,11 +672,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 9,
 					"file": "makefile",
 					"semi_transient": false,
 					"settings":
@@ -532,8 +688,8 @@
 						"selection":
 						[
 							[
-								181,
-								181
+								399,
+								399
 							]
 						],
 						"settings":
@@ -544,11 +700,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 10,
 					"file": "button.c",
 					"semi_transient": false,
 					"settings":
@@ -560,8 +716,8 @@
 						"selection":
 						[
 							[
-								467,
-								467
+								340,
+								340
 							]
 						],
 						"settings":
@@ -572,7 +728,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 8,
 					"type": "text"
 				}
 			]
@@ -580,7 +736,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 45.0
+		"height": 29.0
 	},
 	"input":
 	{
@@ -617,7 +773,7 @@
 	"project": "portfolio.sublime-project",
 	"replace":
 	{
-		"height": 106.0
+		"height": 54.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -675,7 +831,7 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 318.0,
+	"side_bar_width": 234.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

@@ -2,7 +2,6 @@
 #include "keycodes.h"
 #include <panel.h>
 #include <stdlib.h>
-#include <stdbool.h>
  #include <ncurses.h>
 #include <menu.h>
 #include <signal.h>
@@ -45,7 +44,10 @@ typedef struct m{
 	MENU** menu_array;
 }menuList;
 typedef struct scene{
-	bool has_menus;
+	int has_menus;
+	int bnum;
+	size_t bsize;
+	BUTTON** buttons;
 	// char* name;
 	panelList* pl;
 	menuList* ml;
@@ -63,9 +65,11 @@ WINDOW* panelList_window(panelList* pl, int indx);
 panelList* init_panelList(size_t size);
 
 void add_panel(SCENE* SCENE,char* id,int y, int x, int starty, int startx);
-
 void add_panel_offset(SCENE* scene, char*id, int offy, int offx);
 // panelList* add_panel_offset(panelList* pl, char* id, offy,int offx);
+// void add_pad_panel(SCENE* scene, char*id, int h, int w);
+
+void create_border(SCENE* scene,int lm, int tm, int rm, int bm);
 
 char* get_identifier(panelList* pl, int panel_num);
 
@@ -103,20 +107,19 @@ void set_smenu_winsub(SCENE* scene, int mn,int pn, int ypad,int xpad, int offy, 
 
 void set_smenu_win(SCENE* scene, int mn, int pn);
 
+void add_button(SCENE* scene, int pn,int yrel, int xrel, int h, int w);
+
 /* SCENE functions*/
 
 WINDOW* scene_window(SCENE* scene, int pn);
 
 WINDOW* scene_menu_win(SCENE* scene, int mn);
 
-SCENE* init_scene(size_t panels, size_t menus);
+SCENE* init_scene(size_t panels, size_t menus, size_t buttons);
 
 // void new_scene_panel(SCENE* scene);
 
 // void new_scene_menu(SCENE* scene, const char* str,...);
 
-void resize_handler(SCENE* scene, int num,...);
-
-void mainMenuLoop();
 #endif
 

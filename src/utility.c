@@ -92,3 +92,4 @@ void menu_loop(SCENE* scene,int mn)
 	keypad(scene_menu_win(scene,mn),FALSE);
 	nodelay(scene_menu_win(scene,mn),FALSE);
 }
+/* creates 4 windows that make a border. Uses PANEL */

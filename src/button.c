@@ -19,6 +19,11 @@ BUTTON* new_button(WINDOW* super, int yrel, int xrel, int h, int w)
 	return but;
 }
 
+void set_text(BUTTON* button, char* text)
+{
+	
+}
+
 
 WINDOW* button_win(BUTTON* b)
 {
@@ -30,7 +35,7 @@ int is_button_press(MEVENT event,BUTTON* but )
 	int con1,con2;
 	con1 = ((event.x >= but->xbound[0]) && (event.x <= but->xbound[1]));
 	con2 = ((event.y >= but->ybound[0]) && (event.y <= but->ybound[1]));
-	printw("%d, %d : %d --",event.x,event.y,con1&&con2);
+	// printw("%d, %d : %d --",event.x,event.y,con1&&con2);
 	return con1&&con2;
 }
 

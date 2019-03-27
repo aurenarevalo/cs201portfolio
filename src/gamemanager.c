@@ -18,6 +18,8 @@ gameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan)
 		gg->node[i] = init_infectionNode(0,-1);
 	gg->nodes = nodes;
 	gg->game_panel =game_pan;
+	// int padh = (2*r>16) ? 2*r+16 : 16, padw = (3*c>69) ? 3*c+69 : 69;
+	// gg->game_pad = newpad(padh,padw);
 	gg->game_graph = init_Graph(nodes);
 	return gg;
 
@@ -42,6 +44,7 @@ void place_node(gameGrid** grid,infectionNode* node)
 	x = node->pos.x;
 	y = node->pos.y;
 	ggrid->parent->m[y][x] = node->control;
+	// node->node_but = new_button(panel_window(ggrid->game_panel),y*2+1,x*3+1,2,3);
 	node->node_but = new_button(panel_window(ggrid->game_panel),y*2+1,x*3+1,2,3);
 	if(node->control == 1){
 		wbkgd(button_win(node->node_but),COLOR_PAIR(7));
@@ -77,16 +80,19 @@ void add_new_node(gameGrid** grid, int contr, int units, int x, int y)
 
 int rng(unsigned int max,unsigned int min)
  {	
-	unsigned long long x;
+	unsigned long long x=0;
 	unsigned int t = time(NULL);
+	int num =-1;
 	// unsigned int m = 37;
+	while(x==0 || num < min){
 		t ^= (t>>2); t ^= (t<<5); t^= (t<<10);
 		SD1 ^= (SD1<<3); SD1^= (SD1>>8);
 		SD2 ^= (SD2>>5); 
 		SD3 ^= (SD3>>8);
 		 x = (SD1*SD2 +SD3*SD1 + SD1*124567 + SD3)*t/3;
-	int num = x%(max+1);
-	if(num < min) return rng(max,min);
+	 	num = x%(max+1);
+	 }
+	// if(num < min) return rng(max,min);
 	// printf("%u\n",num);	
 	return num;
 }
@@ -99,10 +105,14 @@ float find_distance(infectionNode n1, infectionNode n2)
 	float x2 = n2.pos.x, y2 = n2.pos.y;
 	float dx = x2-x1, dy = y2-y1;
 	float dist = sqrt(pow(dx,2)+pow(dy,2));
-	printf("%f\n\n", dist);
+	// printf("%f\n\n", dist);
 	return dist;
 }
-
+WINDOW* grid_window(gameGrid* gg)
+{
+	if(gg->game_panel==NULL) return NULL;
+	return panel_window(gg->game_panel);
+}
 /*
 * wow, what a function this will be
 * thinking about using a tree to store positions. easier to check 
@@ -143,26 +153,55 @@ void add_adjacency(gameGrid** gg, int from, int to)
 	new_edge(&ggt->game_graph,from,to,dist);
 }
 
-int is_pos_available(gameGrid *gg, int x, int y);
+int is_pos_available(gameGrid *gg, int x, int y)
+{	
+	int size = gg->nodes;
+	for(int i=0; i<size; i++)
+	{
+		if(gg->node[i]->pos.x == x && gg->node[i]->pos.y == y) return 0;
+	}
+	return 1;
+}
 // void connect_nodes
 
 gameGrid* generate_gameGrid(PANEL* game_pan)
 {
 	int nrows, ncols, nodes;
-	nrows = rng(MAX_ROWS,MIN_ROWS); //7
-	ncols = rng(MAX_COLS,MIN_COLS); //7
-	nodes = rng(MAX_NODES,MIN_NODES); //4
+	nrows = 6;//rng(MAX_ROWS,MIN_ROWS); //7
+	ncols = 6;//rng(MAX_COLS,MIN_COLS); //7
+	nodes = 4;//rng(MAX_NODES,MIN_NODES); //4
+	
 	gameGrid* gg = init_gameGrid(nrows,ncols,nodes,game_pan);
-	// ncols--;nrows--;
+	// scrollok(panel_window(gg->game_panel),TRUE);
+	// gg->game_pad = newpad(50,100);
+	// PANEL* p = new_panel(gg->game_pad);
+	// top_panel();
+		// bottom_panel(gg->game_panel);
+	// gg->game_pad = newpad(50,100);
+	ncols--;nrows--;
+	// top_panel(gg->game_panel);
+// getch();
 	for(int r=0; r<nrows; r++){
 		for(int c=0; c<ncols; c++){
 			gg->parent->m[r][c] = 9;
 		}
 	}
-	set_node_params(&gg->node[0],2,50,rng(ncols,0),rng(nrows,0));
+	refresh();
+	int nrow = rng(ncols,1), ncol =rng(nrows,1);
+	// printf("%d %d \n",nrow,ncol);
+	set_node_params(gg->node[0],2,50,3,3);
 	place_node(&gg,gg->node[0]);
-	set_node_params(&gg->node[1],3,50,rng(ncols,1),rng(nrows,1));
-	place_node(&gg,gg->node[1]);
+	refresh();
+	// top_panel(p);
+	update_panels();
+	doupdate();
+	// doupdate();
+	// pnoutrefresh(gg->game_pad,8,15,5,5,6*4,6*5);
+	// doupdate();
+	// wrefresh(panel_window(gg->game_panel));
+	// while(is_pos_available(gg,ncol,nrow)) nrow = rng(ncols,1), ncol = rng(nrow,1);
+	// set_node_params(gg->node[1],3,50,nrow,ncol);
+	// place_node(&gg,gg->node[1]);
 	// add_new_node(&gg,3,50,1,1);
 	// add_new_node(&gg,1,50,3,3);
 	// add_new_node(&gg,2,50,5,5);
@@ -171,13 +210,15 @@ gameGrid* generate_gameGrid(PANEL* game_pan)
 	place_node(&gg,gg->node[0]);
 	set_node_params(gg->node[1],3,50,1,1);
 	place_node(&gg,gg->node[1]);*/
-	for(int i=0; i<nodes; i++)
+/*	for(int i=2; i<nodes; i++)
 	{
-		set_node_params(&gg->node[i],1,50,rng(ncols,0),rng(nrows,0));
+		int newc = rng(ncols,0),newr = rng(nrows,0);
+		while (!is_pos_available(gg,newc,newr)) newc = rng(ncols,0),newr = rng(nrows,0);
+		set_node_params(gg->node[i],1,50,newc,newr);
 		place_node(&gg,gg->node[i]);
-		printf("%d\n",gg->node[i].pos.x);
-	}
-	set_node_params(gg->node[2],1,50,3,3);
+		// printf("%d\n",gg->node[i].pos.x);
+	}*/
+/*	set_node_params(gg->node[2],1,50,3,3);
 	set_node_params(gg->node[3],1,50,5,1);
 	place_node(&gg,gg->node[2]);
 	place_node(&gg,gg->node[3]);
@@ -186,7 +227,7 @@ gameGrid* generate_gameGrid(PANEL* game_pan)
 	add_adjacency(&gg,2,1);
 	add_adjacency(&gg,1,3);
 	add_adjacency(&gg,1,2);
-	add_adjacency(&gg,2,3);
+	add_adjacency(&gg,2,3);*/
 	// add_new_node(&gg,4,50,4,4);
 	// add_new_node(&gg,4,50,2,2);
 	// find_distance(gg->node[0],gg->node[1]);
@@ -367,6 +408,7 @@ float calc_wieghts_from_node(gameGrid *gg,int node)
 
 int calc_attack_AI(gameGrid* gg, int selected)
 {
+	if(gg->game_graph->arr[selected].head == NULL) return;
 	int V = gg->game_graph->vertices;
 	float weight[V];
 	float self_unit_weight;
@@ -403,7 +445,7 @@ int calc_attack_AI(gameGrid* gg, int selected)
 	return minindx;
 	
 }
-void GAME_LOOP_AI(gameGrid* gg)
+void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 {
 	int input;
 
