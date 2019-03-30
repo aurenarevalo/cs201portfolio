@@ -76,7 +76,7 @@ int window_error_handler(int errnum,...){
 void check_size_panelList(panelList *list)
 {
 	if(list->n > list->size){
-		list->size +=1;
+		list->size *=2;
 		list->panel_array = realloc(list->panel_array,list->size*sizeof(list->panel_array));
 		list->id = ( char**)realloc(list->id,list->size*sizeof(char*));
 	}

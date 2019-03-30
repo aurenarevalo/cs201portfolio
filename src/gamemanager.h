@@ -2,6 +2,7 @@
 #include <time.h>
 #include <math.h>
 #include <panel.h>
+#include <limits.h>
 
 
 #include "infection_ds.h"
@@ -14,8 +15,8 @@
 #define MAX_COLS 7
 #define MAX_NODES 10
 
-#define SUB_BOARD_H 18
-#define SUB_BOARD_W 60
+#define SUB_BOARD_H 16
+#define SUB_BOARD_W 70
 
 #define MIN_UNITS 50
 #define MIN_ROWS 5
@@ -55,13 +56,21 @@ typedef struct inode{
 
 typedef struct ggrid{
 	int nodes;
-	int n_p1,n_p2,n_neutral; //actually implement this
+	int n_p1,n_p2,n_neutral; //actually implement thiss
+	int curr_pane, last_pane;
+	int pane_r, pane_c;
 	intMatrix *parent;
 	PANEL* game_panel;
 	// WINDOW* game_pad;
 	infectionNode **node;
 	Graph* game_graph;
 }gameGrid;
+
+typedef struct _gameboard
+{
+	int grids, curr;
+	gameGrid **shown_grid;
+}gameBoard;
 
 gameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan);
 
@@ -84,11 +93,14 @@ float find_distance(infectionNode n1, infectionNode n2);
 *	players_not_adjacent
 *	draw_connections(gameGrid*,) -- calls add_new_node
 */
+int gen_board_panes(SCENE* scene, int y_panes, int x_panes);
+gameGrid* switch_game_pane(SCENE* scene, gameGrid* gg, int dir);
+
 WINDOW* grid_window(gameGrid* gg);
 
 void add_adjacency(gameGrid** gg, int from, int to);
 
-gameGrid* generate_gameGrid(PANEL* game_pan);
+gameGrid* generate_gameGrid(SCENE* gscene,PANEL* game_pan);
 
 void refresh_nodes(gameGrid** gg);
 
@@ -101,7 +113,7 @@ int is_neutral_node(gameGrid* gg, int node);
 // ALSO used for player2 identification!
 int is_enemy_node(gameGrid* gg, int node);
 
-int mk1_check(gameGrid* gg,MEVENT me);
+int mc1_check_nodes(gameGrid* gg,MEVENT me);
 
 int check_units(gameGrid* gg, int node);
 

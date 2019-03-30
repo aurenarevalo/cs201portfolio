@@ -15,13 +15,16 @@ BUTTON* new_button(WINDOW* super, int yrel, int xrel, int h, int w)
 	but->w = w;
 	but->ybound[0] = begy+yrel; but->ybound[1] = begy+h+yrel;
 	but->xbound[0] = begx+xrel; but->xbound[1] = begx+w+xrel;
+	but->text = NULL;
 	but->button_win = derwin(but->super,h,w,yrel,xrel);
 	return but;
 }
 
 void set_text(BUTTON* button, char* text)
-{
-	
+{	
+	button->text = text;
+	wprintw(button_win(button),"%s",button->text);
+	// wrefresh(button_win(button));
 }
 
 

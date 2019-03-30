@@ -118,32 +118,71 @@ WINDOW* grid_window(gameGrid* gg)
 * thinking about using a tree to store positions. easier to check 
 */
 
-/*void find_adjacencies(gameGrid *gg)
+int gen_board_panes(SCENE* scene, int y_panes, int x_panes)
 {
-	int r = gg->parent->r, c = gg->parent->c;
-	int **m = gg->parent->m;
-	for(int i=0;i<gg->nodes;i++)
+	gameBoard* board = malloc(sizeof(gameBoard));
+	
+	int max = y_panes*x_panes;
+	board->shown_grid = malloc(max*sizeof(gameGrid*));
+	
+	int cnt = 0;
+	for(int r = 0; r <= y_panes; r++)
 	{
-		int y = gg->node[i]->pos.y;
-		int x = gg->node[i]->pos.x;
-		for(int row=-1; row<2; row++)
+		for (int c = 0; c <= x_panes; c++)
 		{
-			for(int col=-1; col<2; col++){
-				int in_bounds = (((col+x) >= 0 && (col+x) <c)
-					&& ((row+y) >=0 && (row+y) < r));
-				if(in_bounds)
-				{
-					if(m[row+y][col+x] == 4)
-					{
-						y=row+y
-					}
-				}
-			}
+			if(c == 0) add_panel(scene,"gw_nr",16,70,2,5);
+			else add_panel(scene,"gw_nc",16,70,2,5);
+			board->shown_grid[cnt] = init_gameGrid(SUB_BOARD_H,SUB_BOARD_W,0,scene->pl->panel_array[cnt+2]);
+			mvwprintw(panel_window(scene->pl->panel_array[cnt+2]),5,5,"PANEL: %d",cnt);
+			cnt++;
 		}
-		
-		
 	}
-}*/
+	return cnt;
+}
+
+gameGrid* switch_game_pane(SCENE* scene, gameGrid* gg, int dir)
+{	
+	// new visible panel
+	int curr = gg->curr_pane;
+	int new_vis_pane = 1; //default
+	switch(dir)
+	{
+		// left
+		case 1:
+			if(curr-1 > 1)
+				new_vis_pane = curr-1;
+		break;
+		//up
+		case 2:
+			if(curr-gg->pane_r > 1)
+				new_vis_pane = curr - gg->pane_r;
+		break;
+		//right
+		case 3:
+			if(curr+1 < gg->last_pane)
+				new_vis_pane = curr+1;
+		break;
+		//down
+		case 4:
+			if(curr+gg->pane_r < gg->last_pane)
+				new_vis_pane = curr+gg->pane_r;
+		break;
+		
+		default:
+			new_vis_pane = 1;
+		break;
+	}
+	
+	gg->curr_pane = new_vis_pane;
+	for(int i = 1; i < gg->last_pane; i++)
+	{
+		if( i==gg->curr_pane) show_panel(scene->pl->panel_array[i]);
+		else hide_panel(scene->pl->panel_array[i]);
+	}
+	gg->game_panel = scene->pl->panel_array[gg->curr_pane];
+	update_panels();
+	doupdate();
+}
 
 void add_adjacency(gameGrid** gg, int from, int to)
 {
@@ -164,37 +203,163 @@ int is_pos_available(gameGrid *gg, int x, int y)
 }
 // void connect_nodes
 
-gameGrid* generate_gameGrid(PANEL* game_pan)
+gameGrid* generate_gameGrid(SCENE* gscene,PANEL* game_pan)
 {
-	int nrows, ncols, nodes;
-	nrows = 6;//rng(MAX_ROWS,MIN_ROWS); //7
-	ncols = 6;//rng(MAX_COLS,MIN_COLS); //7
-	nodes = 4;//rng(MAX_NODES,MIN_NODES); //4
+	// rng(10,0);
+	int nrows=5, ncols=5, nodes=5;
+	
+	// WINDOW* get_in = new;
+	PANEL* in_pan = new_panel(newwin_offset(2,5));
+	top_panel(in_pan);
+	update_panels();
+	doupdate();
+
+	// keypad()
+
+	update_panels();
+	doupdate();
+	keypad(panel_window(in_pan),TRUE);
+	curs_set(TRUE);
+	int in=0, count=0,cy,cx;
+	//input should not be larger than 20, (largest unsigned int)
+	char buf[50];
+	// char* input;
+	unsigned long int row,col;
+	echo();
+	int is_valid_input = 0;
+	while(!is_valid_input)
+	{	
+		wclear(panel_window(in_pan));
+		wattron(panel_window(in_pan),A_UNDERLINE);
+		mvwprintw(panel_window(in_pan),5,10,"Enter rows:");
+		wattroff(panel_window(in_pan),A_UNDERLINE);
+		box(panel_window(in_pan),'*','*');
+		count = 0;
+		// wmove(panel_window(in_pan),5, 22);
+		while((in=wgetch(panel_window(in_pan))) !='\n')
+		{
+			buf[count++] = in;
+			getyx(panel_window(in_pan),cy,cx);
+			if(cx > 68) wmove(panel_window(in_pan),cy+1,20);
+			if(count >48) break;
+		}
+		is_valid_input=1;
+		for(int i=0; i< count; i++)
+		{
+			if(isdigit(buf[i])) wprintw(panel_window(in_pan),"%d",i);
+			else is_valid_input=0;
+		}
+	}
+	nrows =0 ;
+	char *in1 = malloc(count*sizeof(char));
+	for(int i=0; i<count;i++)
+	{
+		in1[i]=buf[i];
+	}
+	int game_windows_y = atoi(in1);
+	// printw("--%d,",nrows);
+	is_valid_input=0;
+/*	do
+	{	
+		wclear(panel_window(in_pan));
+		wattron(panel_window(in_pan),A_UNDERLINE);
+		mvwprintw(panel_window(in_pan),5,10,"Enter board:");
+		wattroff(panel_window(in_pan),A_UNDERLINE);
+		box(panel_window(in_pan),'*','*');
+		count = 0;
+		//wmove(panel_window(in_pan),5, 22);
+		while((in=wgetch(panel_window(in_pan))) !='\n')
+		{
+			buf[count++] = in;
+			getyx(panel_window(in_pan),cy,cx);
+			if(cx > 68) wmove(panel_window(in_pan),cy+1,20);
+			if(count >48) break;
+			
+		}
+		is_valid_input=1;
+		for(int i=0; i< count; i++)
+		{
+			if(isdigit(buf[i]));// wprintw(panel_window(in_pan),"%d",i);
+			else is_valid_input=0;
+		}
+		printw("%d-",is_valid_input);
+
+	}while(!is_valid_input);*/
+		do{	
+		// wclear(panel_window(in_pan));
+		wattron(panel_window(in_pan),A_UNDERLINE);
+		mvwprintw(panel_window(in_pan),5,10,"Enter board:");
+		wattroff(panel_window(in_pan),A_UNDERLINE);
+		box(panel_window(in_pan),'*','*');
+		count = 0;
+		//wmove(panel_window(in_pan),5, 22);
+		while((wgetnstr(panel_window(in_pan),buf,40)))
+		{
+			// buf[count++] = in;
+			getyx(panel_window(in_pan),cy,cx);
+			if(cx > 68) wmove(panel_window(in_pan),cy+1,20);
+			// if(count >48) break;
+			
+		}
+		is_valid_input=1;
+		for( count=0; buf[count] !='\0'; count++)
+		{
+			if(isdigit(buf[count]));// wprintw(panel_window(in_pan),"%d",i);
+			else is_valid_input=0;
+		}
+		if(count >= 11 ){ mvwprintw(panel_window(in_pan),3,20,"Max theoretical num is %d",INT_MAX); is_valid_input=0; }
+		printw("%d-",is_valid_input);
+
+	}while(!is_valid_input);
+	char *in2 = malloc(count*sizeof(char));
+	for(int i=0; i<count;i++)
+	{
+		in2[i]=buf[i];
+	}
+	noecho();
+	
+	
+	int game_windows_x = atoi(in2);
+	ncols = atoi(in2);
+	// if(nrows%SUB_BOARD_H != 0) nrows = SUB_BOARD_H+(nrows) - nrows%SUB_BOARD_H;
+	// if(ncols%SUB_BOARD_W != 0) ncols = SUB_BOARD_W+(ncols) - ncols%SUB_BOARD_W;
+	curs_set(FALSE);
+	nrows= game_windows_y*SUB_BOARD_H;
+	 ncols= game_windows_x*SUB_BOARD_W;
+	 printf("%d %d \n",nrows, ncols);
+	// int last_pane = gen_board_panes(gscene, game_windows_y,game_windows_x);
+	
+
+	//NOW add nodes based on grid size (lmao);
 	
 	gameGrid* gg = init_gameGrid(nrows,ncols,nodes,game_pan);
-	// scrollok(panel_window(gg->game_panel),TRUE);
-	// gg->game_pad = newpad(50,100);
-	// PANEL* p = new_panel(gg->game_pad);
-	// top_panel();
-		// bottom_panel(gg->game_panel);
-	// gg->game_pad = newpad(50,100);
-	ncols--;nrows--;
-	// top_panel(gg->game_panel);
-// getch();
+	/*gg->last_pane = last_pane;
+	gg->curr_pane = last_pane;	
+	gg->pane_r = game_windows_y+1, gg->pane_c = game_windows_x+1;
+		
+	gg->game_panel = gscene->pl->panel_array[gg->last_pane-1];
+	ncols--;nrows--;*/
+	
 	for(int r=0; r<nrows; r++){
 		for(int c=0; c<ncols; c++){
 			gg->parent->m[r][c] = 9;
 		}
 	}
 	refresh();
-	int nrow = rng(ncols,1), ncol =rng(nrows,1);
+	// int nrow = rng(ncols,1), ncol =rng(nrows,1);
 	// printf("%d %d \n",nrow,ncol);
 	set_node_params(gg->node[0],2,50,3,3);
+
 	place_node(&gg,gg->node[0]);
+	gg->game_panel = gscene->pl->panel_array[gg->last_pane-2];
+	set_node_params(gg->node[1],2,50,1,5);
+	place_node(&gg,gg->node[1]);
+	gg->game_panel = gscene->pl->panel_array[gg->last_pane];
 	refresh();
 	// top_panel(p);
 	update_panels();
 	doupdate();
+	del_panel(in_pan);
 	// doupdate();
 	// pnoutrefresh(gg->game_pad,8,15,5,5,6*4,6*5);
 	// doupdate();
@@ -206,10 +371,7 @@ gameGrid* generate_gameGrid(PANEL* game_pan)
 	// add_new_node(&gg,1,50,3,3);
 	// add_new_node(&gg,2,50,5,5);
 	// add_new_node(&gg,1,50,5,5);
-/*	set_node_params(gg->node[0],2,50,5,5);
-	place_node(&gg,gg->node[0]);
-	set_node_params(gg->node[1],3,50,1,1);
-	place_node(&gg,gg->node[1]);*/
+
 /*	for(int i=2; i<nodes; i++)
 	{
 		int newc = rng(ncols,0),newr = rng(nrows,0);
@@ -218,19 +380,7 @@ gameGrid* generate_gameGrid(PANEL* game_pan)
 		place_node(&gg,gg->node[i]);
 		// printf("%d\n",gg->node[i].pos.x);
 	}*/
-/*	set_node_params(gg->node[2],1,50,3,3);
-	set_node_params(gg->node[3],1,50,5,1);
-	place_node(&gg,gg->node[2]);
-	place_node(&gg,gg->node[3]);
-	add_adjacency(&gg,0,3);
-	add_adjacency(&gg,0,2);
-	add_adjacency(&gg,2,1);
-	add_adjacency(&gg,1,3);
-	add_adjacency(&gg,1,2);
-	add_adjacency(&gg,2,3);*/
-	// add_new_node(&gg,4,50,4,4);
-	// add_new_node(&gg,4,50,2,2);
-	// find_distance(gg->node[0],gg->node[1]);
+
 
 
 	return gg;
@@ -263,17 +413,33 @@ int is_enemy_node(gameGrid* gg, int node)
 	return (gg->node[node]->control == 3);
 }
 
+// return of 1 = left, 2 = up, 3 = right , 4 = down
+int mc1_check_gw(SCENE* scene, MEVENT me)
+{
+	for(int i=0; i< scene->bnum; i++)
+	{
+		BUTTON* cur_but = scene->buttons[i];
+		printw("1283981u2498uj");
+		if(is_button_press(me,scene->buttons[i]))
+		{
+			
+			if(strcmp(scene->buttons[i],"left")) return 1;
+			else if(strcmp(scene->buttons[i],"right")) return 2;
+			else if(strcmp(scene->buttons[i],"up")) return 3;
+			else if(strcmp(scene->buttons[i],"down")) return 4;
+		}
+	}
+	return 0;
+}
+
 //Check mouse button 1 click (down) is within bounds of a button. Returns the button node.
-int mk1_check(gameGrid* gg,MEVENT me)
+int mc1_check_nodes(gameGrid* gg,MEVENT me)
 {
 		for(int i = 0; i< gg->nodes; i++)
 		{
-			// printw(" - %d  %d ", i,gg->nodes);
 			infectionNode* node = gg->node[i];
 			if(is_button_press(me,node->node_but))
 			{
-				// printw(" - %d  %d ", i,gg->nodes);
-				// mvwprintw(button_win(gg->node[i]->node_but),0,0,"%d",gg->node[i]->units);
 				return i;
 			}
 		}
@@ -360,7 +526,7 @@ int check_win_condition(gameGrid* gg)
 
 int select_node(gameGrid *gg, MEVENT event,int control_select)
 {
-	
+	return 0;
 }
 #define CTRL_W_P 2
 #define CTRL_W_N 1
@@ -396,19 +562,19 @@ int select_node(gameGrid *gg, MEVENT event,int control_select)
 // as reference
 int Djikstra(gameGrid *gg,int n,int start)
 {
-	
+	return 0;
 	
 }
 
 
 float calc_wieghts_from_node(gameGrid *gg,int node)
 {
-	
+	return 0;
 }
 
 int calc_attack_AI(gameGrid* gg, int selected)
 {
-	if(gg->game_graph->arr[selected].head == NULL) return;
+	if(gg->game_graph->arr[selected].head == NULL) return 0;
 	int V = gg->game_graph->vertices;
 	float weight[V];
 	float self_unit_weight;
@@ -445,6 +611,7 @@ int calc_attack_AI(gameGrid* gg, int selected)
 	return minindx;
 	
 }
+
 void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 {
 	int input;
@@ -476,6 +643,8 @@ void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 		ADD A CONFIRMATION FOR SENDING UNITS. TELL PLAYER HOW MANY TURNS IT WILL TAKE TO GET THERE.
 		IF POSSIBLE ADD VISUAL SHOWING WHERE UNITS ARE.
 	*/
+	refresh_nodes(&gg);
+	// int curr_game_pan = 1;
 	int units = 10;
 	int unit_gen = 5;
 	
@@ -484,11 +653,14 @@ void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 	int selected=-1, dest=-1;
 	while((input=wgetch(panel_window(gg->game_panel)))!=122)
 	{
-		switch(input){
-			default:
-			case KEY_MOUSE:
+		switch(input)
+		{
 			
-			if(1){
+			case KEY_MOUSE:
+			default:
+			
+			
+			// if(1){
 				switch(gsai)
 				{
 					case NEW_GAME_AI: //implement regeneration of board
@@ -513,15 +685,13 @@ void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 					case SELECT_NODE_PLAYER:
 						if(getmouse(&event) == OK)
 						{
-							selected = mk1_check(gg,event);
-							if(!(selected<0))
+							selected = mc1_check_nodes(gg,event);
+							if(selected>=0)
 							{
 									
 							if(event.bstate & BUTTON1_PRESSED)
 							{
-								// printw(" oooooo");
-								
-								
+
 								if(is_player_node(gg,selected))
 								{
 									box(button_win(gg->node[selected]->node_but),0,0);
@@ -530,13 +700,40 @@ void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 									// mvprintw(1,1,"node %d selected %d",selected, units);
 									gsai = SEND_UNITS_PLAYER;
 								}
-								else{
+								else
+								{
 									// mvprintw(0,0,"Not a player node");
 									selected=-1;
 								} 
 							}
 						}
-						}
+					
+							int change;
+							// while((change =wgetch(panel_window(gg->game_panel)))!=KEY_MOUSE)
+							// {
+							// 	switch(change)
+							// 	{
+							// 		case 121:
+							// 			switch_game_pane(game_scene,gg,1);
+							// 		break;
+							// 		case (int)KEY_UP:
+							// 			switch_game_pane(game_scene,gg,1);
+							// 		break;
+							// 		case (int)KEY_RIGHT:
+							// 			switch_game_pane(game_scene,gg,1);
+							// 		break;
+							// 		case (int)KEY_DOWN:
+							// 			switch_game_pane(game_scene,gg,1);
+							// 		break;
+							// 	}
+							if(event.bstate & BUTTON1_PRESSED)
+							{
+								int pane_dir;
+							if((pane_dir = mc1_check_gw(game_scene,event)))
+								gg=switch_game_pane(game_scene,gg,pane_dir);
+							}
+					}
+						
 						// gsai = TURN_PLAYER;
 					break;
 					
@@ -559,7 +756,7 @@ void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 						{
 						if(event.bstate & BUTTON1_PRESSED)
 						{	
-							if((dest=mk1_check(gg,event))+1){
+							if((dest= mc1_check_nodes(gg,event))+1){
 								if(check_units(gg,dest)!=1)
 								{
 								wclear(button_win(gg->node[selected]->node_but));
@@ -652,24 +849,20 @@ void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 					case AI_WIN:
 						mvprintw(0,0,"AI WIN!");
 					break;
+					// break;
+			
 				}
-			
-			}
-		
-		
 			break;
-			
-			// default:
-		
-			// break;
+			// }
 		
 		}
-		refresh_nodes(&gg);
+		// refresh_nodes(&gg);
 		update_panels();
 		doupdate();
 		// mvprintw(0,0,"           STATE: %d", gsai);
 	}
 }
+
 
 
 void GAME_LOOP_LOCAL(gameGrid* gg)

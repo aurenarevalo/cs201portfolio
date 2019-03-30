@@ -76,26 +76,40 @@ int main(int argc, char**args){
 
 	
 	// add_panel_offset(game,"game grid",6,10);
-	add_panel(game,"main_game",17,70,2,5);
+	add_panel(game,"nav_gamewins",5, 60,19, 11);
 	update_panels();
 	refresh();
 	doupdate();
-	add_panel(game,"nav_gamewins",4, 60,19, 11);
+
+	add_panel(game,"main_game",16,70,2,5);
 	// add_panel_offset(game,"g",12,20);
 	
-	add_button(game,1,0,3,3,3);
-	
-	wbkgd(button_win(game->buttons[0]),COLOR_PAIR(6));
-	// gameGrid* gg = generate_gameGrid(game->pl->panel_array[0]);
+	add_button(game,0,2,3,2,8);
+	set_text(game->buttons[0],"left");
+	add_button(game,0,2,50,2,8);
+	set_text(game->buttons[1],"right");
+	add_button(game,0,2,42,2,4);
+	set_text(game->buttons[2],"up");
+	add_button(game,0,2,15,2,4	);
+	set_text(game->buttons[3],"down");
+	wbkgd(button_win(game->buttons[0]),COLOR_PAIR(1));
+	wbkgd(button_win(game->buttons[1]),COLOR_PAIR(1));
+	wbkgd(button_win(game->buttons[2]),COLOR_PAIR(1));
+	wbkgd(button_win(game->buttons[3]),COLOR_PAIR(1));
+	// int x,y;
+	// getmaxyx(scene_window(game,0),y,x);
+	// mvwprintw(scene_window(game,1),2,17,"Current window:%d %d ",y,x );
+	gameGrid* gg = generate_gameGrid(game,game->pl->panel_array[0]);
 	
 	// int nrows = 100
-	
+	bkgd(COLOR_PAIR(4));
 	refresh();
 	update_panels();
 
 	box(scene_window(game,0),0,0);
 	box(scene_window(game,1),0,0);
 	// nodelay(scene_window(game,0),TRUE);
+	keypad(scene_window(game,1),TRUE);
 	keypad(scene_window(game,0),TRUE);
 	// wbkgd(grid_window(gg),COLOR_PAIR(4));
 	keypad(stdscr,TRUE);
@@ -105,6 +119,12 @@ int main(int argc, char**args){
 	update_panels();
 	refresh();
 	doupdate();
+getch();
+	switch_game_pane(game,gg,1);
+	getch();
+	switch_game_pane(game,gg,1);
+	getch();
+	switch_game_pane(game,gg,1);
 	// mousemask(ALL_MOUSE_EVENTS,NULL);
 	
 	// int selected_node = -1,dest_node = -1; 
@@ -113,7 +133,11 @@ int main(int argc, char**args){
 	// int ch;	
 	// USE NEW_GAME state to regenerate a board,  and reset everything. For now
 	//Starting on player turn.
-	// GAME_LOOP_AI(gg,game);
+	//GAME_LOOP_AI(gg,game);
+	
+	
+	
+	
 	// intMatrix
 	// int V=gg->game_graph->vertices;
 	// 	intMatrix* adj_mat = construct_adj_matrix(gg->game_graph); 
@@ -126,63 +150,6 @@ int main(int argc, char**args){
 
 	// free(game);
 	// free(gg);
-/*	while((ch=wgetch(scene_window(game,0)))!=122){
-		// int mouse_x, mouse_y;
-		switch(ch)
-		{
-			case KEY_MOUSE:
-			if(getmouse(&event) == OK)
-			{	
-				if(selected_node<0){
-					if(event.bstate & BUTTON1_PRESSED)
-					{
-						selected_node = mk1_check(gg,event);
-						if(is_player_node(gg,selected_node)){
-							box(button_win(gg->node[selected_node]->node_but),0,0);
-							mvprintw(0,0,"node %d selected",selected_node);
-						}
-						else
-						{
-							mvprintw(0,0,"not a player node");
-							// wclear(stdscr);
-						}
-						
-						// wattron()
-						
-					}
-				}
-				else
-				{
-					if(event.bstate & BUTTON1_PRESSED)
-					{
-						wclear(button_win(gg->node[selected_node]->node_but));
-						if(mk1_check(gg,event) == selected_node){
-							printw("**cancelled selection");
-							
-							selected_node=-1;
-						}
-						else
-						{
-							dest_node = mk1_check(gg,event);
-							// printw("**DEST NODE: %d **",dest_node);
-							sub_units(gg,dest_node,10);
-							selected_node=-1;
-							dest_node=-1;
-							// wclear(button_win(gg->node[selected_node]->node_but));
-						}
-						
-					}
-				}
-			}
-			break;
-		}
-		// refresh();
-
-		refresh_nodes(&gg);
-
-		update_panels();
-		doupdate();
-	}*/
 
 	// SCENE* game = init_scene(s2,2);
 
@@ -203,6 +170,20 @@ int main(int argc, char**args){
 	// DFS(adj_mat,2,visited,path,0);
 	
 	// print_matrix(m);
+	// printf("\n%d",KEY_ENTER);
+	// print_matrix(gg->parent);
+	for(int i=0; i< game->pl->n;i++)
+	{
+		printf("%s\n",game->pl->id[i]);
+	}
+	printf("%d, %d",gg->parent->r, gg->parent->c);
+	
+	// float t = 1.1;
+
+	// printf("\n%lf\n",t);
+	// t =  t/10;
+
+	// printf("\n%lf\n",t);
 }
 
 
