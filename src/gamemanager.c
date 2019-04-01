@@ -19,13 +19,21 @@ gameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan)
 	gg->node_size = nodes;
 	gg->nodes = 0;
 	gg->game_panel =game_pan;
-	// snode_winy = malloc((r/SUB_BOARD_H)*sizeof(int));
-	// snode_winx = mallov((c/SUB_BOARD_W)*sizeof(int));
-	// int padh = (2*r>16) ? 2*r+16 : 16, padw = (3*c>69) ? 3*c+69 : 69;
-	// gg->game_pad = newpad(padh,padw);
 	
 	return gg;
 
+}
+void delete_gameGrid(gameGrid* gg)
+{
+	 gg->node_size=0,gg->nodes=0;
+	gg->n_p1=0,gg->n_p2=0,gg->n_neutral=0;
+	gg->pane_r=0, gg->pane_c=0;
+	gg->parent=NULL;
+	// PANEL* game_panel=;
+	// WINDOW* game_pad;
+	gg->node=NULL;
+	gg->game_graph=NULL;
+	
 }
 
 infectionNode* init_infectionNode()
@@ -48,16 +56,6 @@ void place_node(gameGrid** grid,infectionNode* node)
 	y = node->pos.y;
 	ggrid->parent->m[y][x] = node->control;
 	node->node_but =NULL;
-	// node->node_but = new_button(panel_window(ggrid->game_panel),y*2+1,x*3+1,2,3);
-	// node->node_but = new_button(panel_window(ggrid->game_panel),y*2+1,x*3+1,2,3);
-/*	if(node->control == 1){
-		wbkgd(button_win(node->node_but),COLOR_PAIR(7));
-	}
-	else if(node->control == 2)
-		wbkgd(button_win(node->node_but),COLOR_PAIR(5));
-	else if(node->control == 3)
-		wbkgd(button_win(node->node_but),COLOR_PAIR(6));
-	mvwprintw(button_win(node->node_but),0,0,"%d",node->units);*/
 }
 
 void set_node_params(infectionNode* node,int contr, int units, int x, int y)
@@ -96,11 +94,11 @@ int rng(unsigned int max,unsigned int min)
 	unsigned int t = time(NULL);
 	int num =-1;
 	// unsigned int m = 37;
-	while(x==0 || num < min){
-		t ^= (t>>2); t ^= (t<<5); t^= (t<<10);
-		SD1 ^= (SD1<<3); SD1^= (SD1>>8);
-		SD2 ^= (SD2>>5); 
-		SD3 ^= (SD3>>8);
+	while(x<=0 || num < min){
+		t ^= (t>>2); t ^= (t<<5); t^= (t<<5);
+		SD1 ^= (SD1<<3); SD1^= (SD1>>3);
+		SD2 ^= (SD2>>3); 
+		SD3 ^= (SD3>>1);
 		 x = (SD1*SD2 +SD3*SD1 + SD1*124567 + SD3)*t/3;
 	 	num = x%(max+1);
 	 }
@@ -130,7 +128,7 @@ WINDOW* grid_window(gameGrid* gg)
 * thinking about using a tree to store positions. easier to check 
 */
 
-int gen_board_panes(SCENE* scene, int y_panes, int x_panes)
+/*int gen_board_panes(SCENE* scene, int y_panes, int x_panes)
 {
 	gameBoard* board = malloc(sizeof(gameBoard));
 	
@@ -150,7 +148,7 @@ int gen_board_panes(SCENE* scene, int y_panes, int x_panes)
 		}
 	}
 	return cnt;
-}
+}*/
 
 /*gameGrid* switch_game_pane(SCENE* scene, gameGrid* gg, int dir)
 {	
@@ -232,8 +230,6 @@ gameGrid* generate_gameGrid(SCENE* gscene,PANEL* game_pan)
 	update_panels();
 	doupdate();
 
-	// keypad()
-
 	update_panels();
 	doupdate();
 	keypad(panel_window(in_pan),TRUE);
@@ -245,8 +241,9 @@ gameGrid* generate_gameGrid(SCENE* gscene,PANEL* game_pan)
 	echo();
 	int is_valid_input = 0;
 do{	
-		mvwprintw(panel_window(in_pan),3,20,"Max theoretical num is %d",INT_MAX);
-		mvwprintw(panel_window(in_pan),4,14,"So input over 10 digits will read as invalid");
+		mvwprintw(panel_window(in_pan),2,20,"Max theoretical num is %d",INT_MAX);
+		mvwprintw(panel_window(in_pan),3,14,"So input over 10 digits will read as invalid");
+		mvwprintw(panel_window(in_pan),4,14,"anything over %d will cause error", INT_MAX);
 		wattron(panel_window(in_pan),A_UNDERLINE);
 		mvwprintw(panel_window(in_pan),5,10,"Enter rows:");
 		wattroff(panel_window(in_pan),A_UNDERLINE);
@@ -275,8 +272,9 @@ do{
 	is_valid_input=0;
 		do{	
 		// wclear(panel_window(in_pan));
-		mvwprintw(panel_window(in_pan),3,20,"Max theoretical num is %d",INT_MAX);
-		mvwprintw(panel_window(in_pan),4,14,"So input over 10 digits will read as invalid");
+		mvwprintw(panel_window(in_pan),2,20,"Max theoretical num is %d",INT_MAX);
+		mvwprintw(panel_window(in_pan),3,14,"So input over 10 digits will read as invalid");
+		mvwprintw(panel_window(in_pan),4,14,"anything over %d will guarantee error", INT_MAX);
 		// mvwprintw(panel_window(in_pan),4,14,"");
 		wattron(panel_window(in_pan),A_UNDERLINE);
 		mvwprintw(panel_window(in_pan),6,10,"Enter cols:");
@@ -304,7 +302,6 @@ do{
 	update_panels();
 	doupdate();
 	noecho();
-	// getch();
 	int game_windows_x = atoi(in2);
 	ncols = atoi(in2);
 	curs_set(FALSE);
@@ -315,7 +312,6 @@ do{
 	gg->game_graph= init_Graph(gg->pane_r*gg->pane_c*MAX_NODES);
 	refresh();
 	int pos_x,pos_y,p1_nodes,p2_nodes,win_nodes,ntrl_nodes,ctrl;
-	
 	del_panel(in_pan);
 	for(int i = 0; i < gg->pane_r; i++)
 	{
@@ -327,36 +323,32 @@ do{
 			p1_nodes = p2_nodes = win_nodes/4;
 			ntrl_nodes = win_nodes - 2*p1_nodes;
 			for(int c = 0; c < win_nodes;c++){
-				pos_x = rng(SUB_BOARD_W*(j+1)/3-1,SUB_BOARD_W*j/NODE_W);
-				pos_y = rng(SUB_BOARD_H*(i+1)/2-1,SUB_BOARD_H*i/NODE_H);
-				if(ctrl_count[1] < p1_nodes && ctrl_count[2] < p2_nodes && ctrl_count[0] < ntrl_nodes) ctrl = rng(3,1);
-				else if (ctrl_count[1] < p1_nodes && ctrl_count[2] < p2_nodes)  ctrl = rng(3,2);
-				else if (ctrl_count[2] < p2_nodes) ctrl = 3;
-				else if (ctrl_count[1] < p1_nodes ) ctrl =2;
-				else ctrl = 1;
+				pos_x = rng(SUB_BOARD_W*(j+1)/3-2,SUB_BOARD_W*j/NODE_W+1);
+				pos_y = rng(SUB_BOARD_H*(i+1)/2-2,SUB_BOARD_H*i/NODE_H+1);
+				// if(ctrl_count[1] < p1_nodes && ctrl_count[2] < p2_nodes && ctrl_count[0] < ntrl_nodes) ctrl = rng(3,1);
+				// else if (ctrl_count[1] < p1_nodes && ctrl_count[2] < p2_nodes)  ctrl = rng(3,2);
+				if (ctrl_count[1] < p1_nodes) ctrl = 2;
+				else if (ctrl_count[2] < p2_nodes ) ctrl =3;
+				else if (ctrl_count[0] < ntrl_nodes)ctrl = 1;
+				
 				ctrl_count[ctrl-1]++;
 				
 				while(!is_pos_available(gg,pos_x,pos_y))
 				{
-					// printf("heo");
-					pos_x = rng(SUB_BOARD_W*(j+1)/3-1,SUB_BOARD_W*j/NODE_W);
-					pos_y = rng(SUB_BOARD_H*(i+1)/2-1,SUB_BOARD_H*i/NODE_H);
+					pos_x = rng(SUB_BOARD_W*(j+1)/3-2,SUB_BOARD_W*j/NODE_W+1);
+					pos_y = rng(SUB_BOARD_H*(i+1)/2-2,SUB_BOARD_H*i/NODE_H+1);
 				}
 				add_new_node(&gg,(float)ctrl,50,pos_x,pos_y);
-				// printf("%-|| %d -- %d || \n",pos_x,pos_y);
 				int nd = i*gg->pane_c+j;
 				if (c>0)add_adjacency(&gg,nd,nd+c);
 		}
 		}
-		// gg->snode_winy[i] = 
 	}
 
 	refresh();
 	update_panels();
 	doupdate();
 	// del_panel(in_pan);
-
-
 
 	return gg;
 }
@@ -404,7 +396,7 @@ int find_end_node(gameGrid* gg,int snode, int win_y, int win_x)
 	infectionNode *tmp = gg->node[snode];
 	int node_x = tmp->pos.x, node_y = tmp->pos.y;
 	int i =0 ;
-	for( i =snode; i < gg->nodes && node_x <bounds_x[1];i++)
+	for( i =snode; i < gg->nodes && node_x <bounds_x[1]+1;i++)
 	{
 		tmp = gg->node[i];
 		node_x = tmp->pos.x;
@@ -429,17 +421,16 @@ void change_sub_board(gameGrid** gg,int win_y_new, int win_x_new,int old_x, int 
 	gameGrid* ggt= *gg;
 	int start_indx = find_start_node(ggt,win_y_new,win_x_new);
 	int end_indx = find_end_node(ggt,start_indx,win_y_new,win_x_new);
-	int oldstart = find_start_node(ggt,old_y,old_x);
-	int oldend = find_end_node(ggt,oldstart,old_y,old_x);
-	for(int i = oldstart; i <= oldend;i++)
+	int oldstart = 0;//find_start_node(ggt,old_y,old_x);
+	int oldend = 2;//find_end_node(ggt,oldstart,old_y,old_x);
+	for(int i = oldstart; i < oldend;i++)
 		free(ggt->node[i]->node_but);
-	//BUTTON* new_button(WINDOW* super, int yrel, int xrel, int h, int w)
 	for(int i = start_indx; i <= end_indx;i++)
 	{
 		infectionNode* tmp = ggt->node[i];
 		int rel_x = tmp->pos.x*NODE_W-SUB_BOARD_W*win_x_new,rel_y=tmp->pos.y*NODE_H-SUB_BOARD_H*win_y_new;
-		printf("%d,%d\n",start_indx,end_indx);
-		getch();
+		// printf("%d,%d\n",start_indx,end_indx);
+		// getch();
 		//node->node_but = new_button(panel_window(ggrid->game_panel),y*2+1,x*3+1,2,3);
 		ggt->node[i]->node_but = new_button(panel_window(ggt->game_panel),rel_y,rel_x,2,3);
 		if(tmp->control == 1){
@@ -645,7 +636,7 @@ float calc_wieghts_from_node(gameGrid *gg,int node)
 int calc_attack_AI(gameGrid* gg, int selected)
 {
 	if(gg->game_graph->arr[selected].head == NULL) return 0;
-	int V = gg->game_graph->vertices;
+	int V = 10; //max nodes per board
 	float weight[V];
 	float self_unit_weight;
 	for(int i=0; i<V; i++)
@@ -673,7 +664,7 @@ int calc_attack_AI(gameGrid* gg, int selected)
 	for(int i=1; i<V; i++){ 
 		if(min == 0 || weight[i] < min) min =weight[i];
 		weight[i] *= self_unit_weight;
-		printf("%f\n",weight[i]);
+		// printf("%f\n",weight[i]);
 	}
 	int minindx = binary_search(weight,V,min);
 	return minindx;
@@ -724,8 +715,9 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 	int endgame=0;
 	int end_game_return = 0;
 	int selected=-1, dest=-1;
-	while((input=wgetch(panel_window(gg->game_panel)))!=122 && !endgame)
+	while((input=wgetch(panel_window(gg->game_panel)))!='q' && !endgame)
 	{
+		
 		switch(input)
 		{
 			
@@ -743,14 +735,14 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 					case TURN_PLAYER:
 						wclear(stdscr);
 						//something useless
-						// mvprintw(0,0,"Player turn");
+						mvprintw(0,0,"Player turn");
 						gsai = SELECT_NODE_PLAYER;
 						
 					break;
 					
 					case TURN_AI:
 						wclear(stdscr);
-						// mvprintw(0,0,"Computer turn");
+						mvprintw(0,0,"Computer turn");
 						gsai=SELECT_NODE_AI;
 						
 					break;
@@ -780,51 +772,59 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 								} 
 							}
 						}
-						if(event.bstate  & BUTTON3_PRESSED)
+						if(event.bstate  & BUTTON2_CLICKED)
 							gsai=END_TURN_PLAYER;
-					
-				}
-							// int change;
-							// while((change =wgetch(panel_window(gg->game_panel)))!=KEY_MOUSE)
-							// {
-							// 	switch(change)
-							// 	{
-							// 		case 121:
-							// 			switch_game_pane(game_scene,gg,1);
-							// 		break;
-							// 		case (int)KEY_UP:
-							// 			switch_game_pane(game_scene,gg,1);
-							// 		break;
-							// 		case (int)KEY_RIGHT:
-							// 			switch_game_pane(game_scene,gg,1);
-							// 		break;
-							// 		case (int)KEY_DOWN:
-							// 			switch_game_pane(game_scene,gg,1);
-							// 		break;
-							// 	}
-					// 		if(event.bstate & BUTTON1_PRESSED)
-					// 		{
-					// 			int pane_dir;
-					// 		if((pane_dir = mc1_check_gw(game_scene,event)))
-					// 			gg=switch_game_pane(game_scene,gg,pane_dir);
-					// 		}
-					// }
+						else if ( event.bstate & BUTTON1_DOUBLE_CLICKED){
+								if(curr_win_x+1 < gg->pane_c) new_win_x++;
+								else break;
+								wclear(panel_window(gg->game_panel));
+								change_sub_board(&gg,new_win_y,new_win_x,curr_win_y,curr_win_x);
+								
+								curr_win_x++;
+							}
+						else if( event.bstate & BUTTON1_TRIPLE_CLICKED)
+							{
+								if(curr_win_y+1 < gg->pane_r) new_win_y++;
+								else break;
+								wclear(panel_window(gg->game_panel));
+								change_sub_board(&gg,new_win_y,new_win_x,curr_win_y,curr_win_x);
+								
+								curr_win_y++;
+							}
+						else if(event.bstate & BUTTON3_TRIPLE_CLICKED)
+							{
+								if(curr_win_y-1 >=0) new_win_y--;
+								else break;
+								wclear(panel_window(gg->game_panel));
+								change_sub_board(&gg,new_win_y,new_win_x,curr_win_y,curr_win_x);
+								
+								curr_win_y--;
+								refresh_nodes(&gg,curr_win_y,curr_win_x);
+							}
+							else if(event.bstate & BUTTON3_DOUBLE_CLICKED)
+							{
+								if(curr_win_x-1 >=0) new_win_x--;
+								else break;
+								wclear(panel_window(gg->game_panel));
+								change_sub_board(&gg,new_win_y,new_win_x,curr_win_y,curr_win_x);
+								
+								curr_win_x--;
+								refresh_nodes(&gg,curr_win_y,curr_win_x);
+							}
+						}
 						
-						// gsai = TURN_PLAYER;
 					break;
 					
 					case SELECT_NODE_AI: ;
-					//
 						int start =find_start_node(gg,curr_win_y,curr_win_x);
 						int end= find_end_node(gg,start,curr_win_y,curr_win_x);
 						while(!is_enemy_node(gg,(selected = rng(end,start))) && !check_win_condition(gg));
+						printw("%d node selected ai tard",selected);
 						units = gg->node[selected]->units/2;
 						gsai=WEIGH_OPTIONS_AI;
 					break;
 					
 					case WEIGH_OPTIONS_AI:
-						printw("AI thinking");
-						// napms(2000);
 						dest = calc_attack_AI(gg,selected);
 						gsai=SEND_UNITS_AI;
 					break;
@@ -865,14 +865,9 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 						}
 						
 						}
-						
-						// gsai=TURN_PLAYER;
 					break;
 					
 					case SEND_UNITS_AI:
-					
-						// int extra_sub=0;
-						// int extra_add=0;
 						sub_units(gg,selected,units);
 						int extra_add, extra_sub;
 						if(is_neutral_node(gg,dest) || is_player_node(gg,dest))extra_sub = sub_units(gg,dest,units);
@@ -922,27 +917,33 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 							gsai=TURN_PLAYER;
 					break;
 					
-					case PLAYER_WIN:
+					case PLAYER_WIN: ;
 						PANEL* pwin = new_panel(newwin_offset(8,15));
-						box(panel_window(pwin));
+						box(panel_window(pwin),0,0);
 						
 						mvwprintw(panel_window(pwin),2,20,"PLAYER WIN!");
-						mvwprintw(panel_window(pwin),2,20,"Press a key to continue, press q to exit");
+						mvwprintw(panel_window(pwin),3,20,"Press a key to continue, press q to exit");
 						nodelay(panel_window(pwin),FALSE);
-						int endch= wgetch(panel_window(pwin));
+						update_panels();
+						doupdate();
+						int endch;//= wgetch(panel_window(pwin));
 						del_panel(pwin);
+						while((endch= wgetch(panel_window(pwin)))==KEY_MOUSE);
 						if(endch=='q') end_game_return=1;
 						endgame=1;
 					break;
 					
-					case AI_WIN:
+					case AI_WIN: ;
 						PANEL* ewin = new_panel(newwin_offset(8,15));
-						box(panel_window(ewin));
+						box(panel_window(ewin),0,0);
 						
-						mvwprintw(panel_window(ewin),2,20,"PLAYER WIN!");
+						mvwprintw(panel_window(ewin),2,20,"ENEMY WIN!");
 						mvwprintw(panel_window(ewin),2,20,"Press a key to play again, press q to exit");
 						nodelay(panel_window(ewin),FALSE);
-						int endch= wgetch(panel_window(ewin));
+						update_panels();
+						doupdate();
+						// endch= wgetch(panel_window(ewin));
+						while((endch= wgetch(panel_window(ewin)))==KEY_MOUSE);
 						if(endch=='q') end_game_return=1;
 						del_panel(ewin);
 						endgame=1;
@@ -950,15 +951,25 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 			
 				}
 			break;
-			// }
+		case 113: // if q
+			endgame=1;
+			end_game_return=1;
+			//exit
+		break;
+		
 		
 		}
+		
+		mvwprintw(scene_window(game_scene,0),2,10,"Curr x win: %d  of %d| Curr y win: %d of %d", curr_win_x,gg->pane_c-1,curr_win_y,gg->pane_r-1);
 		refresh_nodes(&gg,curr_win_y,curr_win_x);
 		update_panels();
 		doupdate();
+
 		
 		// mvprintw(0,0,"           STATE: %d", gsai);
 	}
+			if(input=='q') end_game_return=1;
+	clear();
 	return end_game_return;
 }
 

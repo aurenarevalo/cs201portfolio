@@ -23,7 +23,7 @@
 */
 
 void initialize_ncurses();
-
+void end_screen();
 void splash(int fade_delay,int print_delay);
 
 short WINCOL;
@@ -42,9 +42,10 @@ int main(int argc, char**args){
 	
 	
 	initialize_ncurses();
-	//splash(15,75);
+	splash(15,75);
 
-	//MAIN MENU
+	//MAIN MENU, UNIMPLEMENTED, NOT NEEDED, BUT WAS DESIRED....
+	
 /*	SCENE* mm = init_scene(2,2);
 	add_menu(mm,"Play against AI","Play locally","Tutorial","Options","Exit",NULL);
 	add_panel_offset(mm,"menu", 5, 5);
@@ -54,13 +55,8 @@ int main(int argc, char**args){
 	mvwhline(scene_menu_win(mm,0),2,1,ACS_HLINE,73);
 	set_menu_back(mm->ml->menu_array[0],COLOR_PAIR(3));
 	wbkgd(menu_win(mm->ml->menu_array[0]),COLOR_PAIR(1));
-	post_menu(mm->ml->menu_array[0]);*/
+	post_menu(mm->ml->menu_array[0]);
 	
-	/*TO DO
-
-	1. Write a menu returning fun
-	2. new resize handler
-	3. ensure error handling
 
 	*/
 
@@ -73,7 +69,7 @@ int main(int argc, char**args){
 
 
 	SCENE* game = init_scene(6,0,2);
-
+	
 	
 	// add_panel_offset(game,"game grid",6,10);
 	add_panel(game,"nav_gamewins",5, 60,19, 11);
@@ -85,136 +81,57 @@ int main(int argc, char**args){
 	// add_panel(game,"main_game",16,70,2,5);
 	// add_panel_offset(game,"g",12,20);
 	
-	add_button(game,0,2,3,2,8);
-	set_text(game->buttons[0],"left");
-	add_button(game,0,2,50,2,8);
-	set_text(game->buttons[1],"right");
-	add_button(game,0,2,42,2,4);
-	set_text(game->buttons[2],"up");
-	add_button(game,0,2,15,2,4	);
-	set_text(game->buttons[3],"down");
-	wbkgd(button_win(game->buttons[0]),COLOR_PAIR(1));
-	wbkgd(button_win(game->buttons[1]),COLOR_PAIR(1));
-	wbkgd(button_win(game->buttons[2]),COLOR_PAIR(1));
-	wbkgd(button_win(game->buttons[3]),COLOR_PAIR(1));
-	for(int r = 0; r < 8;r++)
+
+	
+/*	for(int r = 0; r < 8;r++)
 	{
 		for(int c = 0; c<23;c++)
 		{
 			mvwprintw(scene_window(game,1),r*2-1,c*3-1,"|");
 			mvwprintw(scene_window(game,1),r*2-1,c*3-1,"|");
 		}
-	}
-	gameGrid* gg = generate_gameGrid(game,game->pl->panel_array[1]);
+	}*/
+	
 	bkgd(COLOR_PAIR(4));
 	refresh();
 	update_panels();
 
 	box(scene_window(game,0),0,0);
-	box(scene_window(game,1),0,0);
-	// nodelay(scene_window(game,0),TRUE);
 	keypad(scene_window(game,1),TRUE);
 	keypad(scene_window(game,0),TRUE);
-	// wbkgd(grid_window(gg),COLOR_PAIR(4));
+
 	keypad(stdscr,TRUE);
-	// prefresh(gg->game_pad,0,0,6,11,18,69);
-	// top_panel(game->pl->panel_array[2]);
+
 	
 	update_panels();
 	refresh();
 	doupdate();
 	
-	// change_sub_board(&gg,1,1,0,0);
-	// refresh_nodes(&gg,1,1);
-// getch();
-	// switch_game_pane(game,gg,1);
-	// getch()s;
-	// switch_game_pane(game,gg,1);
-	// getch();
-	// wclear(panel_window(gg->game_panel));
-	// update_panels();
-	// doupdate();
-	// getch();
-	// change_sub_board(&gg,1,0,1,1);
-	// refresh_nodes(&gg,1,0);
-	// getch();
-	// switch_game_pane(game,gg,1);
-	// mousemask(ALL_MOUSE_EVENTS,NULL);
-	
-	// int selected_node = -1,dest_node = -1; 
-
-	// MEVENT event;
-	// int ch;	
 	// USE NEW_GAME state to regenerate a board,  and reset everything. For now
 	//Starting on player turn.
-	GAME_LOOP_AI(gg,game);
-	
-	
-	
-	
-	// intMatrix
-	// int V=gg->game_graph->vertices;
-	// 	intMatrix* adj_mat = construct_adj_matrix(gg->game_graph); 
-	// int visited[V];
-	// int path[V];
-	// for(int i=0; i<V; i++) visited[i]=0,path[i]=0;
-	// int* dist_arr= malloc(V*sizeof(int));
-	//  DFS(adj_mat,2,visited,path,0);
-	
-
-	// free(game);
-	// free(gg);
-
-	// SCENE* game = init_scene(s2,2);
-
+	int loop_cond = 0;
+	while(!loop_cond)
+	{
+		gameGrid* gg = generate_gameGrid(game,game->pl->panel_array[1]);
+		loop_cond = GAME_LOOP_AI(gg,game);
+		delete_gameGrid(gg);
+		wclear(panel_window(gg->game_panel));
+		wrefresh(panel_window(gg->game_panel));
+		clear();
+	}
+	free(game);
+	clear();
+	refresh();
+	update_panels();
+	doupdate();
+	end_screen();
 
 	refresh();
 	update_panels();
 	doupdate();
-	getch();
-	// menu_loop(mm,0);
-	// getch();
 	refresh();
 	endwin();
-	// intMatrix* gm = construct_adj_matrix(gg->game_graph);
-	// print_matrix(gm);
-	// calc_attack_AI(gg,1);
-	// for(int i=0; i<V; i++)
-	// 	printf("%d\n",dist_arr[i]);
-	// DFS(adj_mat,2,visited,path,0);
 	
-	// print_matrix(m);
-	// printf("\n%d",KEY_ENTER);
-	// print_matrix(gg->parent);
-	/*for(int i=0; i< game->pl->n;i++)
-	{
-		printf("%s\n",game->pl->id[i]);
-	}
-	printf("%d, %d",gg->parent->r, gg->parent->c);*/
-	
-	// float t = 1.1;
-
-	// printf("\n%lf\n",t);
-	// t =  t/10;
-
-	// printf("\n%lf\n",t);
-	// int nodeee = find_start_node(gg,1,1 );
-	// int edon =  find_end_node(gg,nodeee,1,1);
-	// printf("%d p1, %d p2, %d n\n",gg->n_p1,gg->n_p2,gg->n_neutral);
-	// printf("%d node %d\n",nodeee,edon);
-	
-	
-	
-	Point p;
-	p.x = 3,p.y=2;
-	if(p.x >= 3 && p.x < 6) printf("yeah\n");
-	
-	for(int i = 0; i < gg->nodes; i++)
-	{
-		printf("***%d, %d***\n",gg->node[i]->pos.x,gg->node[i]->pos.y);
-		printf("!**%d, %d**!\n",gg->node[i]->node_but->x,gg->node[i]->node_but->y);
-		
-	}
 }
 
 
@@ -256,8 +173,8 @@ void initialize_ncurses(){
 void splash(int fade_delay,int print_delay)
 {
 
-	printw("\nPlease note that the windows resize with the terminal,");
-	printw(" but some terminal sizes may not be optimal for the game");
+	printw("\nPlease note that window sizes that are not default (24 rows, 80 cols)");
+	printw(" Will result in a buggy display. If not this size, fix and rerun.");
 	refresh();
 	napms(2000);
 	clear();
@@ -295,4 +212,17 @@ void splash(int fade_delay,int print_delay)
 	init_color(COLOR_WHITE,800,800,800);
 	clear();
 	napms(1000);
+}
+
+void end_screen()
+{
+	nodelay(stdscr,FALSE);
+	PANEL* end = new_panel(newwin_offset(5,10));
+	mvwprintw(panel_window(end),10,30,"THANKS FOR PLAYING.");
+	mvwprintw(panel_window(end),12,30,"PRESS ANY KEY TO EXIT");
+	refresh();
+	update_panels();
+	doupdate();
+	getch();
+	del_panel(end);
 }

@@ -76,6 +76,7 @@ typedef struct _gameboard
 }gameBoard;
 
 gameGrid* init_gameGrid(int r, int c, int nodes,PANEL* game_pan);
+void delete_gameGrid(gameGrid* gg);
 
 infectionNode* init_infectionNode();
 
