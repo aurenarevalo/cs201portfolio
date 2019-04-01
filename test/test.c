@@ -74,3 +74,28 @@ PANEL* pan1, *pan2;
 }
 
 
+
+
+
+
+
+
+int start_offset_r = 0;
+int start_offset_c = 0;
+int spacing_offset_r = 2;
+int spacing_offset_c = 2;
+int vert_bar_pos = 1;
+for(int r = 0; r < Bsize*spacing_offset_r; r++)
+{
+  for (int c = 0; c < Bsize*spacing_offset_c; c++)
+  {
+    if(c%spacing_offset_c == 0){
+    mvwprintw(YOURWIN, (r+start_offset_r),(c+start_offset_c),"%c",B->letters[(r/spacing_offset_r)*Bsize+c/spacing_offset_c]);
+  }
+  /*  ******ONLY IF YOU WANT A VERTICAL BAR **********
+  else if (c%spacing_offset_c == vert_bar_pos){
+    mvwprintw(YOURWIN, (r+start_offset_r),(c+start_offset_c),"|");
+  }*/
+  }
+  mvwprintw(YOURWIN,r+start_offset_r,c+start_offset_c,"\n");
+}
