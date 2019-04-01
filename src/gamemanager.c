@@ -636,7 +636,7 @@ float calc_wieghts_from_node(gameGrid *gg,int node)
 int calc_attack_AI(gameGrid* gg, int selected)
 {
 	if(gg->game_graph->arr[selected].head == NULL) return 0;
-	int V = 10; //max nodes per board
+	int V = gg->game_graph->vertices; //max nodes per board
 	float weight[V];
 	float self_unit_weight;
 	for(int i=0; i<V; i++)
@@ -818,15 +818,15 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 					case SELECT_NODE_AI: ;
 						int start =find_start_node(gg,curr_win_y,curr_win_x);
 						int end= find_end_node(gg,start,curr_win_y,curr_win_x);
-						while(!is_enemy_node(gg,(selected = rng(gg->nodes,0))) && !check_win_condition(gg));
-						printw("%d node d",start);
+						while(!is_enemy_node(gg,(selected = rng(gg->nodes-1,0))) && !check_win_condition(gg));
+						// printw("%d node d",start);
 						units = gg->node[selected]->units/2;
 						gsai=WEIGH_OPTIONS_AI;
 					break;
 					
 					case WEIGH_OPTIONS_AI:
 						
-						dest = calc_attack_AI(gg,8);
+						dest = calc_attack_AI(gg,selected);
 						gsai=SEND_UNITS_AI;
 					break;
 					
