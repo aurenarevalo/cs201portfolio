@@ -423,7 +423,7 @@ void change_sub_board(gameGrid** gg,int win_y_new, int win_x_new,int old_x, int 
 	int end_indx = find_end_node(ggt,start_indx,win_y_new,win_x_new);
 	int oldstart = 0;//find_start_node(ggt,old_y,old_x);
 	int oldend = 2;//find_end_node(ggt,oldstart,old_y,old_x);
-	for(int i = oldstart; i < oldend;i++)
+	for(int i = oldstart; i <= oldend;i++)
 		free(ggt->node[i]->node_but);
 	for(int i = start_indx; i <= end_indx;i++)
 	{
@@ -799,7 +799,7 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 								change_sub_board(&gg,new_win_y,new_win_x,curr_win_y,curr_win_x);
 								
 								curr_win_y--;
-								refresh_nodes(&gg,curr_win_y,curr_win_x);
+								// refresh_nodes(&gg,curr_win_y,curr_win_x);
 							}
 							else if(event.bstate & BUTTON3_DOUBLE_CLICKED)
 							{
@@ -809,7 +809,7 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 								change_sub_board(&gg,new_win_y,new_win_x,curr_win_y,curr_win_x);
 								
 								curr_win_x--;
-								refresh_nodes(&gg,curr_win_y,curr_win_x);
+								// refresh_nodes(&gg,curr_win_y,curr_win_x);
 							}
 						}
 						
@@ -818,14 +818,15 @@ int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene)
 					case SELECT_NODE_AI: ;
 						int start =find_start_node(gg,curr_win_y,curr_win_x);
 						int end= find_end_node(gg,start,curr_win_y,curr_win_x);
-						while(!is_enemy_node(gg,(selected = rng(end,start))) && !check_win_condition(gg));
-						printw("%d node selected ai tard",selected);
+						while(!is_enemy_node(gg,(selected = rng(gg->nodes,0))) && !check_win_condition(gg));
+						printw("%d node d",start);
 						units = gg->node[selected]->units/2;
 						gsai=WEIGH_OPTIONS_AI;
 					break;
 					
 					case WEIGH_OPTIONS_AI:
-						dest = calc_attack_AI(gg,selected);
+						
+						dest = calc_attack_AI(gg,8);
 						gsai=SEND_UNITS_AI;
 					break;
 					

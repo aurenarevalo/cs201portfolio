@@ -42,7 +42,7 @@ int main(int argc, char**args){
 	
 	
 	initialize_ncurses();
-	splash(15,75);
+	// splash(15,75);
 
 	//MAIN MENU, UNIMPLEMENTED, NOT NEEDED, BUT WAS DESIRED....
 	
