@@ -27,6 +27,10 @@ void set_text(BUTTON* button, char* text)
 	// wrefresh(button_win(button));
 }
 
+/*void del_button(BUTTON* button)
+{
+	delwin(button->button_win);
+}*/
 
 WINDOW* button_win(BUTTON* b)
 {

@@ -77,11 +77,12 @@ int main(int argc, char**args){
 	
 	// add_panel_offset(game,"game grid",6,10);
 	add_panel(game,"nav_gamewins",5, 60,19, 11);
+	add_panel(game,"main_game",SUB_BOARD_H,SUB_BOARD_W,1,5);
 	update_panels();
 	refresh();
 	doupdate();
 
-	add_panel(game,"main_game",16,70,2,5);
+	// add_panel(game,"main_game",16,70,2,5);
 	// add_panel_offset(game,"g",12,20);
 	
 	add_button(game,0,2,3,2,8);
@@ -96,12 +97,15 @@ int main(int argc, char**args){
 	wbkgd(button_win(game->buttons[1]),COLOR_PAIR(1));
 	wbkgd(button_win(game->buttons[2]),COLOR_PAIR(1));
 	wbkgd(button_win(game->buttons[3]),COLOR_PAIR(1));
-	// int x,y;
-	// getmaxyx(scene_window(game,0),y,x);
-	// mvwprintw(scene_window(game,1),2,17,"Current window:%d %d ",y,x );
-	gameGrid* gg = generate_gameGrid(game,game->pl->panel_array[0]);
-	
-	// int nrows = 100
+	for(int r = 0; r < 8;r++)
+	{
+		for(int c = 0; c<23;c++)
+		{
+			mvwprintw(scene_window(game,1),r*2-1,c*3-1,"|");
+			mvwprintw(scene_window(game,1),r*2-1,c*3-1,"|");
+		}
+	}
+	gameGrid* gg = generate_gameGrid(game,game->pl->panel_array[1]);
 	bkgd(COLOR_PAIR(4));
 	refresh();
 	update_panels();
@@ -119,12 +123,22 @@ int main(int argc, char**args){
 	update_panels();
 	refresh();
 	doupdate();
-getch();
-	switch_game_pane(game,gg,1);
-	getch();
-	switch_game_pane(game,gg,1);
-	getch();
-	switch_game_pane(game,gg,1);
+	
+	// change_sub_board(&gg,1,1,0,0);
+	// refresh_nodes(&gg,1,1);
+// getch();
+	// switch_game_pane(game,gg,1);
+	// getch()s;
+	// switch_game_pane(game,gg,1);
+	// getch();
+	// wclear(panel_window(gg->game_panel));
+	// update_panels();
+	// doupdate();
+	// getch();
+	// change_sub_board(&gg,1,0,1,1);
+	// refresh_nodes(&gg,1,0);
+	// getch();
+	// switch_game_pane(game,gg,1);
 	// mousemask(ALL_MOUSE_EVENTS,NULL);
 	
 	// int selected_node = -1,dest_node = -1; 
@@ -133,7 +147,7 @@ getch();
 	// int ch;	
 	// USE NEW_GAME state to regenerate a board,  and reset everything. For now
 	//Starting on player turn.
-	//GAME_LOOP_AI(gg,game);
+	GAME_LOOP_AI(gg,game);
 	
 	
 	
@@ -172,11 +186,11 @@ getch();
 	// print_matrix(m);
 	// printf("\n%d",KEY_ENTER);
 	// print_matrix(gg->parent);
-	for(int i=0; i< game->pl->n;i++)
+	/*for(int i=0; i< game->pl->n;i++)
 	{
 		printf("%s\n",game->pl->id[i]);
 	}
-	printf("%d, %d",gg->parent->r, gg->parent->c);
+	printf("%d, %d",gg->parent->r, gg->parent->c);*/
 	
 	// float t = 1.1;
 
@@ -184,6 +198,23 @@ getch();
 	// t =  t/10;
 
 	// printf("\n%lf\n",t);
+	// int nodeee = find_start_node(gg,1,1 );
+	// int edon =  find_end_node(gg,nodeee,1,1);
+	// printf("%d p1, %d p2, %d n\n",gg->n_p1,gg->n_p2,gg->n_neutral);
+	// printf("%d node %d\n",nodeee,edon);
+	
+	
+	
+	Point p;
+	p.x = 3,p.y=2;
+	if(p.x >= 3 && p.x < 6) printf("yeah\n");
+	
+	for(int i = 0; i < gg->nodes; i++)
+	{
+		printf("***%d, %d***\n",gg->node[i]->pos.x,gg->node[i]->pos.y);
+		printf("!**%d, %d**!\n",gg->node[i]->node_but->x,gg->node[i]->node_but->y);
+		
+	}
 }
 
 

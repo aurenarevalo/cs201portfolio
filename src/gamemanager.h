@@ -11,17 +11,20 @@
 #include "gamestates.h"
 
 #define MAX_UNITS 100
-#define MAX_ROWS 7
-#define MAX_COLS 7
+// #define MAX_ROWS 7
+// #define MAX_COLS 7
 #define MAX_NODES 10
 
+#define NODE_H 2
+#define NODE_W 3
+
 #define SUB_BOARD_H 16
-#define SUB_BOARD_W 70
+#define SUB_BOARD_W 69
 
 #define MIN_UNITS 50
-#define MIN_ROWS 5
-#define MIN_COLS 6
-#define MIN_NODES 5
+// #define MIN_ROWS 5
+// #define MIN_COLS 6
+#define MIN_NODES 4
 
 /*
 
@@ -55,9 +58,9 @@ typedef struct inode{
 }infectionNode;
 
 typedef struct ggrid{
-	int nodes;
+	int node_size,nodes;
 	int n_p1,n_p2,n_neutral; //actually implement thiss
-	int curr_pane, last_pane;
+	// int *snode_winy,*snode_winx;
 	int pane_r, pane_c;
 	intMatrix *parent;
 	PANEL* game_panel;
@@ -102,7 +105,13 @@ void add_adjacency(gameGrid** gg, int from, int to);
 
 gameGrid* generate_gameGrid(SCENE* gscene,PANEL* game_pan);
 
-void refresh_nodes(gameGrid** gg);
+int find_start_node(gameGrid *gg, int win_y, int win_x);
+
+int find_end_node(gameGrid* gg,int snode, int win_y, int win_x);
+
+void refresh_nodes(gameGrid** gg,int win_y, int win_x);
+
+void change_sub_board(gameGrid** gg,int win_y_new, int win_x_new,int old_x, int old_y);
 
 int is_player_node(gameGrid* gg, int node);
 
@@ -113,11 +122,13 @@ int is_neutral_node(gameGrid* gg, int node);
 // ALSO used for player2 identification!
 int is_enemy_node(gameGrid* gg, int node);
 
-int mc1_check_nodes(gameGrid* gg,MEVENT me);
+int is_node_press(gameGrid* gg,int n, MEVENT me, int win_y, int win_x);
+
+int mc1_check_nodes(gameGrid* gg,MEVENT me,int win_y, int win_x);
 
 int check_units(gameGrid* gg, int node);
 
-void change_control(gameGrid* gg, int node, int new_control, int overflow);
+void change_control(gameGrid* gg, int node, int new_control, int overflow,int win_y, int win_x);
 
 // void set_units(gameGrid* gg, int node, int units);
 
@@ -130,7 +141,7 @@ int check_win_condition(gameGrid* gg);
 float calc_base_weight(gameGrid *gg,int node);
 int calc_attack_AI(gameGrid* gg, int selected);
 
-void GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene);
+int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene);
 
 void GAME_LOOP_LOCAL(gameGrid* gg);
 
