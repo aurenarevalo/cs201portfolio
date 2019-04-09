@@ -31,18 +31,9 @@ short PLAYER_COLOR,ENEMY_COLOR,NEUTRAL;
 
 
 int main(int argc, char**args){
-
-	/*Graph* g = init_Graph(4);
-	new_edge(&g,3,0);
-	new_edge(&g,1,2);
-	new_edge(&g,2,3);
-	new_edge(&g,0,1);
-	intMatrix* m = construct_adj_matrix(g);
-	*/
-	
 	
 	initialize_ncurses();
-	splash(15,75);
+	splash(8,50);
 
 	//MAIN MENU, UNIMPLEMENTED, NOT NEEDED, BUT WAS DESIRED....
 	
@@ -77,20 +68,6 @@ int main(int argc, char**args){
 	update_panels();
 	refresh();
 	doupdate();
-
-	// add_panel(game,"main_game",16,70,2,5);
-	// add_panel_offset(game,"g",12,20);
-	
-
-	
-/*	for(int r = 0; r < 8;r++)
-	{
-		for(int c = 0; c<23;c++)
-		{
-			mvwprintw(scene_window(game,1),r*2-1,c*3-1,"|");
-			mvwprintw(scene_window(game,1),r*2-1,c*3-1,"|");
-		}
-	}*/
 	
 	bkgd(COLOR_PAIR(4));
 	refresh();
@@ -102,13 +79,12 @@ int main(int argc, char**args){
 
 	keypad(stdscr,TRUE);
 
-	
 	update_panels();
 	refresh();
 	doupdate();
-	
 	// USE NEW_GAME state to regenerate a board,  and reset everything. For now
 	//Starting on player turn.
+
 	int loop_cond = 0;
 	while(!loop_cond)
 	{
@@ -131,6 +107,7 @@ int main(int argc, char**args){
 	doupdate();
 	refresh();
 	endwin();
+
 	
 }
 

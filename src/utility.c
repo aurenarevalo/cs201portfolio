@@ -41,7 +41,7 @@ int binary_search(float arr[], int arr_size, int key)
 	
 	int indx=(high-low)/2;
 	int curr_num = arr[indx];
-	while( (key != curr_num) && indx>=1 && high!=low)
+	while( (key != curr_num) && high!=low)
 	{
 		if(curr_num > key)
 			high = indx;

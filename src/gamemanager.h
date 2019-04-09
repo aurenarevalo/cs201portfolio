@@ -3,7 +3,7 @@
 #include <math.h>
 #include <panel.h>
 #include <limits.h>
-
+#include <ctype.h>
 
 #include "infection_ds.h"
 #include "utility.h"
@@ -90,13 +90,6 @@ int rng(unsigned int max,unsigned int min);
 
 float find_distance(infectionNode n1, infectionNode n2);
 
-/* function that will need to be implemented, named for ideas */
-
-/*	
-*	randomize_adjacency(gameGrid*,...?);
-*	players_not_adjacent
-*	draw_connections(gameGrid*,) -- calls add_new_node
-*/
 int gen_board_panes(SCENE* scene, int y_panes, int x_panes);
 gameGrid* switch_game_pane(SCENE* scene, gameGrid* gg, int dir);
 
@@ -119,7 +112,6 @@ int is_player_node(gameGrid* gg, int node);
 //returns if node is a neutral node or not
 int is_neutral_node(gameGrid* gg, int node);
 
-
 // ALSO used for player2 identification!
 int is_enemy_node(gameGrid* gg, int node);
 
@@ -131,16 +123,13 @@ int check_units(gameGrid* gg, int node);
 
 void change_control(gameGrid* gg, int node, int new_control, int overflow,int win_y, int win_x);
 
-// void set_units(gameGrid* gg, int node, int units);
-
 int add_units(gameGrid* gg,int node, int units);
-
 
 int sub_units(gameGrid* gg,int node, int units);
 
 int check_win_condition(gameGrid* gg);
 float calc_base_weight(gameGrid *gg,int node);
-int calc_attack_AI(gameGrid* gg, int selected);
+int calc_attack_AI(gameGrid* gg, int selected,int win_y, int win_x);
 
 int GAME_LOOP_AI(gameGrid* gg, SCENE* game_scene);
 
