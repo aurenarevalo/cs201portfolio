@@ -31,9 +31,10 @@ short PLAYER_COLOR,ENEMY_COLOR,NEUTRAL;
 
 
 int main(int argc, char**args){
-	
+	char* splash_enable = args[argc-1];
 	initialize_ncurses();
-	splash(8,50);
+	if(strcmp(splash_enable,"nosplash")) splash(8,50);
+	// else splash(8,50);
 
 	//MAIN MENU, UNIMPLEMENTED, NOT NEEDED, BUT WAS DESIRED....
 	

@@ -12,11 +12,5 @@ all: $(TARGET) clean
 $(TARGET): $(OBJFILES)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJFILES) $(LDFLAGS)
 
-# grabdict:
-# 	 grep -v "'\|^[A-Z]\|é"  /usr/share/dict/words > "prelim.txt"; 
-# 	 grep -x "^..\+."  prelim.txt > "test.txt"; rm prelim.txt
-	# find . -path "$(HOME)../" -print 
-
-
 clean:
 	rm -f $(OBJFILES) *~

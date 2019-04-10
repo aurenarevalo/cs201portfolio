@@ -315,6 +315,7 @@ int find_end_node(gameGrid* gg,int snode, int win_y, int win_x)
 	for( i =snode; i < gg->nodes && node_x <bounds_x[1]+1;i++)
 	{
 		tmp = gg->node[i];
+		
 		node_x = tmp->pos.x;
 		// node_y = tmp->pos.y;
 	}
@@ -326,7 +327,7 @@ void refresh_nodes(gameGrid** gg,int win_y, int win_x)
 	gameGrid* ggt= *gg;
 	int start_indx = find_start_node(ggt,win_y,win_x);
 	int end_indx = find_end_node(ggt,start_indx,win_y,win_x);
-	for(int i = start_indx; i< end_indx; i++)
+	for(int i = start_indx; i<= end_indx; i++)
 	{	
 		if(ggt->node[i]->control == 1)wbkgd(button_win(ggt->node[i]->node_but),COLOR_PAIR(7));
 		else if ( ggt->node[i]->control == 2)wbkgd(button_win(ggt->node[i]->node_but),COLOR_PAIR(5));
@@ -391,7 +392,7 @@ int mc1_check_nodes(gameGrid* gg,MEVENT me,int win_y,int win_x )
 {
 	int strt = find_start_node(gg,win_y,win_x);
 	int end = find_end_node(gg,strt,win_y,win_x);
-		for(int i = strt; i< end; i++)
+		for(int i = strt; i<= end; i++)
 		{
 			infectionNode* node = gg->node[i];
 			if(is_button_press(me,node->node_but))
@@ -455,6 +456,8 @@ int check_win_condition(gameGrid* gg)
 {	
 	if(gg->n_p2 <=0) return 1;
 	if(gg->n_p1 <=0) return 2;
+	if(gg->n_neutral <= 0 && gg->n_p1 > gg->n_p2) return 1;
+	if(gg->n_neutral <= 0 && gg->n_p2 > gg->n_p1) return 2;
 	
 	return 0;
 }
